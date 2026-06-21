@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたに合う猫の種類診断</title>
+    <style>
+        /* 全体的なスタイル */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #a1c4fd 0%, #c2e9fb 100%); /* グラデーション背景 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            box-sizing: border-box; /* パディングを考慮して要素のサイズを計算 */
+        }
+
+        .container {
+            background-color: white; /* 白いカード */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%; /* レスポンシブ対応 */
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            color: #4CAF50; /* 猫のイメージに合う色 */
+            margin-bottom: 25px;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 30px;
+            background-color: #FF7043; /* ボタンの色 */
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            text-decoration: none; /* Xシェアボタン用 */
+            -webkit-appearance: none; /* iOS Safari のデフォルトスタイルをリセット */
+            -moz-appearance: none; /* Firefox のデフォルトスタイルをリセット */
+            appearance: none; /* その他のブラウザのデフォルトスタイルをリセット */
+        }
+
+        .button:hover {
+            background-color: #E64A19;
+        }
+
+        /* 質問カードのスタイル */
+        .question-group {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .question-group label {
+            display: block;
+            background-color: #f0f8ff; /* 選択肢の背景 */
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            border: 1px solid #e0e0e0;
+            position: relative; /* カスタムラジオボタンの位置指定のため */
+        }
+
+        .question-group label:hover {
+            background-color: #e6f7ff;
+            transform: translateY(-2px);
+        }
+
+        .question-group input[type="radio"] {
+            display: none; /* デフォルトのラジオボタンを隠す */
+        }
+
+        /* カスタムラジオボタンの外枠 */
+        .question-group label span::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            background-color: white;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        /* カスタムラジオボタンの内側の点 */
+        .question-group label span::after {
+            content: '';
+            position: absolute;
+            left: 20px; /* `left` + `border-width` */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: white; /* チェック時に色が変わる */
+            z-index: 1; /* 外枠より手前に表示 */
+            opacity: 0; /* デフォルトでは非表示 */
+            transition: all 0.2s ease;
+        }
+
+        /* チェックされた時の外枠のスタイル */
+        .question-group input[type="radio"]:checked + span::before {
+            border-color: #4CAF50;
+            background-color: #4CAF50;
+        }
+
+        /* チェックされた時の内側の点のスタイル */
+        .question-group input[type="radio"]:checked + span::after {
+            opacity: 1; /* 表示 */
+        }
+
+        /* 選択肢テ��ストの調整 */
+        .question-group label span {
+            padding-left: 45px; /* カスタムラジオボタンのスペースを確保 */
+            display: block; /* テキスト全体がクリック可能に */
+        }
+
+        .navigation-buttons {
+            margin-top: 30px;
+        }
+
+        .navigation-buttons .button + .button {
+            margin-left: 15px;
+        }
+
+        /* 結果表示のスタイル */
+        .result-image {
+            max-width: 80%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: block; /* 中央寄せのため */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .share-buttons {
+            margin-top: 30px;
+        }
+
+        .share-buttons .button {
+            background-color: #1DA1F2; /* Xのブランドカラー */
+        }
+
+        .share-buttons .button:hover {
+            background-color: #0c85d0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app-container">
+
+        <!-- 開始画面 -->
+        <div id="start-screen">
+            <h1>あ��たに合う猫の種類診断</h1>
+            <p>いくつかの質問に答えるだけで、あなたの性格やライフスタイルにぴったりの猫の種類が分かります。さあ、あなたと最高の相性の猫を見つけましょう！</p>
+            <button class="button" id="start-button">診断を始める</button>
+        </div>
+
+        <!-- 質問画面 -->
+        <div id="question-screen" class="hidden">
+            <h2 id="question-text"></h2>
+            <div id="options-container" class="question-group">
+                <!-- 質問の選択肢はJSで挿入される -->
+            </div>
+            <div class="navigation-buttons">
+                <button class="button" id="next-button">次へ</button>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="hidden">
+            <h2 id="result-title"></h2>
+            <img src="" alt="診断結果の猫" id="result-image" class="result-image">
+            <p id="result-description"></p>
+            <div class="share-buttons">
+                <a href="#" target="_blank" class="button" id="x-share-button">Xで結果をシェア</a>
+            </div>
+            <button class="button" id="restart-button" style="margin-top: 15px;">もう一度診断する</button>
+        </div>
+
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "休日の過ごし方で一番近いのは？",
+                options: [
+                    { text: "家でのんびり読書や映画鑑賞", value: 1 },
+                    { text: "特に予定は決めず、気分次第で過ごす", value: 2 },
+                    { text: "友達と出かけたり、イベントに参加", value: 3 },
+                    { text: "新しい趣味を見つけたり、どこかへ小旅行", value: 4 }
+                ]
+            },
+            {
+                question: "猫と暮らすなら、どんな関係が理想？",
+                options: [
+                    { text: "互いに尊重し合い、適度な距離感を保ちたい", value: 1 },
+                    { text: "気まぐれでいい、気が向いたら構うくらいが楽", value: 2 },
+                    { text: "いつも一緒にいて、たくさ���甘えてほしい", value: 3 },
+                    { text: "一緒に遊んだり、新しいことを教えたりしたい", value: 4 }
+                ]
+            },
+            {
+                question: "あなたの性格を漢字一文字で表すなら？",
+                options: [
+                    { text: "静", value: 1 },
+                    { text: "自", value: 2 },
+                    { text: "楽", value: 3 },
+                    { text: "探", value: 4 }
+                ]
+            },
+            {
+                question: "部屋のインテリアを選ぶとき、重視するのは？",
+                options: [
+                    { text: "落ち着いた色合いと機能性", value: 1 },
+                    { text: "特にこだわりはなく、インスピレーションで", value: 2 },
+                    { text: "明るく華やかな雰囲気、トレンド", value: 3 },
+                    { text: "個性的でユニークなデザイン、こだわり", value: 4 }
+                ]
+            },
+            {
+                question: "ストレスを感じたとき、どう対処する？",
+                options: [
+                    { text: "一人で静かに考え事をする", value: 1 },
+                    { text: "時間が解決してくれると���じ、特に何もしない", value: 2 },
+                    { text: "友達に相談したり、気分転換に出かける", value: 3 },
+                    { text: "新しいことに挑戦したり、気分転換になる趣味に没頭する", value: 4 }
+                ]
+            }
+        ];
+
+        const resultsData = {
+            britishShorthair: {
+                name: "ブリティッシュショートヘア",
+                description: "あなたは穏やかで落ち着いた性格。ブリティッシュショートヘアのように、控えめながらも愛情深く、のんびりとした時間を大切にするパートナーがぴったりです。お互いの空間を尊重し合い、ゆったりとした時間を共有できるでしょう。",
+                image: "https://via.placeholder.com/400x300/87CEEB/FFFFFF?text=British+Shorthair" // ダミーURL
+            },
+            russianBlue: {
+                name: "ロシアンブルー",
+                description: "あなたは洗練されていて、独立心と知性を併せ持つタイプ。ロシアンブルーは、物静かで賢く、飼い主には深い愛情を示す猫です。お互いのペースを尊重しつつ、静かで落ち着いた絆を築けるでしょう。",
+                image: "https://via.placeholder.com/400x300/B0C4DE/FFFFFF?text=Russian+Blue" // ダミーURL
+            },
+            americanShorthair: {
+                name: "アメリカンショートヘア",
+                description: "あなたは陽気で遊び好き、好奇心旺盛なタイプ。アメリカンショートヘアは、明るく社交的で、遊びが大好きな猫です。毎日の生活に楽しさと活気をもたらしてくれる、最高の遊び相手になるでしょう。",
+                image: "https://via.placeholder.com/400x300/FFD700/FFFFFF?text=American+Shorthair" // ダミーURL
+            },
+            bengal: {
+                name: "ベンガル",
+                description: "あなたはエネルギッシュで冒険心に溢れ、常に新しい刺激を求めるタイプ。ベンガルは、ワイルドな見た目と知性、活発さを兼ね備えています。一緒にアクティブに過ごし、知的好奇心を満たしてくれる理想のパートナーです。",
+                image: "https://via.placeholder.com/400x300/D2B48C/FFFFFF?text=Bengal" // ダミーURL
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+
+        // DOM要素の取得
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startButton = document.getElementById('start-button');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultImage = document.getElementById('result-image');
+        const resultDescription = document.getElementById('result-description');
+        const xShareButton = document.getElementById('x-share-button');
+
+        // イベントリスナー
+        startButton.addEventListener('click', startQuiz);
+        nextButton.addEventListener('click', collectAnswer);
+        restartButton.addEventListener('click', restartQuiz);
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = `Q${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+            optionsContainer.innerHTML = ''; // 選択肢をクリア
+
+            currentQuestion.options.forEach((option, index) => {
+                const label = document.createElement('label');
+                label.innerHTML = `
+                    <input type="radio" name="question${currentQuestionIndex}" value="${option.value}" id="q${currentQuestionIndex}-opt${index}">
+                    <span>${option.text}</span>
+                `;
+                optionsContainer.appendChild(label);
+            });
+        }
+
+        function collectAnswer() {
+            const selectedOption = document.querySelector(`input[name="question${currentQuestionIndex}"]:checked`);
+            if (!selectedOption) {
+                alert('選択肢を選んでください！');
+                return;
+            }
+
+            totalScore += parseInt(selectedOption.value, 10);
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            questionScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            let resultKey;
+            if (totalScore <= 7) { // 5問 x 1点 = 5点 から 7点
+                resultKey = 'britishShorthair';
+            } else if (totalScore <= 11) { // 8点 から 11点
+                resultKey = 'russianBlue';
+            } else if (totalScore <= 15) { // 12点 から 15点
+                resultKey = 'americanShorthair';
+            } else { // 16点 から 20点
+                resultKey = 'bengal';
+            }
+
+            const result = resultsData[resultKey];
+            resultTitle.textContent = `あなたに合う猫は【${result.name}】です！`;
+            resultImage.src = result.image;
+            resultImage.alt = result.name;
+            resultDescription.textContent = result.description;
+
+            // XシェアボタンのURLを生成
+            const shareText = `診断結果！私に合う猫は【${result.name}】でした！あなたも診断してみよう！`;
+            const shareUrl = encodeURIComponent(window.location.href); // 現在のページのURL
+            const hashtags = encodeURIComponent('猫の種類診断,猫');
+            xShareButton.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${shareUrl}&hashtags=${hashtags}`;
+        }
+
+        function restartQuiz() {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            // 診断開始時にアニメーションが再度適用されるようにクラスをつけ直す
+            startScreen.style.animation = 'none';
+            void startScreen.offsetWidth; // 強制的にリフロー
+            startScreen.style.animation = null;
+        }
+
+        // 初期表示
+        startScreen.classList.remove('hidden');
+        questionScreen.classList.add('hidden');
+        resultScreen.classList.add('hidden');
+
+    </script>
+</body>
+</html>

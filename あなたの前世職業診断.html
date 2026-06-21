@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの前世職業診断</title>
+    <style>
+        /* CSS */
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96); /* グラデーション背景 */
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .card {
+            background-color: #ffffff; /* 白いカード */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-sizing: border-box;
+            transition: all 0.3s ease-in-out;
+        }
+
+        h1 {
+            color: #3f2b96;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        h2 {
+            color: #4a4a4a;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+        }
+
+        h3 {
+            color: #3f2b96;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 25px;
+        }
+
+        li {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            background-color: #f0f0f0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            font-size: 1.1em;
+            text-align: left;
+            position: relative;
+            user-select: none;
+            border: 1px solid #e0e0e0;
+        }
+
+        label:hover {
+            background-color: #e5e5e5;
+            transform: translateY(-2px);
+        }
+
+        input[type="radio"] {
+            display: none; /* ラジオボタンを隠す */
+        }
+
+        input[type="radio"]:checked + label {
+            background-color: #a8c0ff;
+            color: #3f2b96;
+            border-color: #3f2b96;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #3f2b96;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #5c41bd;
+            transform: translateY(-3px);
+        }
+
+        .share-buttons {
+            margin-top: 30px;
+        }
+
+        .share-buttons button {
+            background-color: #1DA1F2; /* X (Twitter) Blue */
+            margin: 0 10px;
+        }
+
+        .share-buttons button:hover {
+            background-color: #0d8ddb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .question-counter {
+            font-size: 0.9em;
+            color: #777;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="app">
+        <!-- 開始画面 -->
+        <div id="start-screen">
+            <h1>あなたの前世職業診断</h1>
+            <p>簡単な5つの質問に答えて、あなたの前世の職業を診断しましょう！</p>
+            <button id="start-button">診断を始める</button>
+        </div>
+
+        <!-- 質問画面 -->
+        <div id="question-screen" class="hidden">
+            <h2 id="question-text">質問が入ります</h2>
+            <p class="question-counter" id="question-counter"></p>
+            <ul id="choices-list">
+                <!-- 選択肢がJSによって挿入される -->
+            </ul>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="hidden">
+            <h3>あなたの前世の職業は...</h3>
+            <h2 id="result-title">結果タイトル</h2>
+            <p id="result-description">結果の説明が入ります。</p>
+            <div class="share-buttons">
+                <button id="share-x-button">結果をXでシェア</button>
+            </div>
+            <button id="restart-button">もう一度診断する</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript
+        const questions = [
+            {
+                question: "休日の過ごし方で一番好きなのは？",
+                choices: [
+                    { text: "新しい場所を探索する", score: 1 },
+                    { text: "じっくりと読書や研究に没頭する", score: 2 },
+                    { text: "ものづくりや手作業に打ち込む", score: 3 },
+                    { text: "人と会って交流を楽しむ", score: 4 }
+                ]
+            },
+            {
+                question: "もし魔法が使えるなら、どんな魔法を使いたい？",
+                choices: [
+                    { text: "時間を操る魔法（過去を見て未来を予知）", score: 1 },
+                    { text: "知識を瞬時に得る魔法", score: 2 },
+                    { text: "ものを創造・修復する魔法", score: 3 },
+                    { text: "人の心を癒す魔法", score: 4 }
+                ]
+            },
+            {
+                question: "解決したい問題に直面したとき、まずどうする？",
+                choices: [
+                    { text: "情報を集め、多角的に分析する", score: 1 },
+                    { text: "図書館や専門家に相談し、深く学ぶ", score: 2 },
+                    { text: "実際に手を動かして試行錯誤する", score: 3 },
+                    { text: "関係者と話し合い、協力して解決策を探る", score: 4 }
+                ]
+            },
+            {
+                question: "あなたの部屋に一つだけ置けるとしたら何を選ぶ？",
+                choices: [
+                    { text: "地球儀や地図", score: 1 },
+                    { text: "分厚い百科事典", score: 2 },
+                    { text: "道具一式が入ったツールボックス", score: 3 },
+                    { text: "暖炉と快適なソファ", score: 4 }
+                ]
+            },
+            {
+                question: "他人からどんな人だと言われることが多い？",
+                choices: [
+                    { text: "好奇心旺盛で冒険好き", score: 1 },
+                    { text: "物静かで思慮深い", score: 2 },
+                    { text: "器用で実用的", score: 3 },
+                    { text: "人当たりが良く面倒見が良い", score: 4 }
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                minScore: 5,
+                maxScore: 8,
+                title: "冒険家・探検家",
+                description: "あなたは前世で、未知の土地を切り開き、新たな発見をもたらす冒険家や探検家だったかもしれません。常に新しい知識や経験を求め、困難にも勇敢に立ち向かったことでしょう。その好奇心と行動力は、今のあなたにも受け継がれています。"
+            },
+            {
+                minScore: 9,
+                maxScore: 12,
+                title: "学者・研究者",
+                description: "あなたは前世で、書物や実験に囲まれ、真理の探究に人生を捧げた学者や研究者だったかもしれません。深い洞察力と論理的な思考で、世界の謎を解き明かそうと努めたことでしょう。その知的好奇心と探究心は、今のあなたにも息づいています。"
+            },
+            {
+                minScore: 13,
+                maxScore: 16,
+                title: "職人・発明家",
+                description: "あなたは前世で、自らの手で素晴らしいものを作り出し、人々に喜びを与えた職人や発明家だったかもしれません。細部にこだわり、完璧を追求する姿勢は、多くの人々から尊敬を集めたことでしょう。その創造性と実用性は、今のあなたにも受け継がれています。"
+            },
+            {
+                minScore: 17,
+                maxScore: 20,
+                title: "治療師・調停者",
+                description: "あなたは前世で、人々の心身の癒しや争いの解決に尽力した治療師や調停者だったかもしれません。共感力と包容力に富み、周囲の人々に安らぎと平和をもたらしたことでしょう。その優しさと調和の精神は、今のあなたにも流れています。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startButton = document.getElementById('start-button');
+        const questionText = document.getElementById('question-text');
+        const questionCounter = document.getElementById('question-counter');
+        const choicesList = document.getElementById('choices-list');
+
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const shareXButton = document.getElementById('share-x-button');
+        const restartButton = document.getElementById('restart-button');
+
+        startButton.addEventListener('click', startQuiz);
+        restartButton.addEventListener('click', restartQuiz);
+        shareXButton.addEventListener('click', shareOnX);
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            resultScreen.classList.add('hidden'); // 念のため結果画面も隠す
+
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const questionData = questions[currentQuestionIndex];
+                questionText.textContent = questionData.question;
+                questionCounter.textContent = `質問 ${currentQuestionIndex + 1} / ${questions.length}`;
+                choicesList.innerHTML = ''; // 選択肢をクリア
+
+                questionData.choices.forEach((choice, index) => {
+                    const listItem = document.createElement('li');
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = 'answer';
+                    input.id = `choice-${index}`;
+                    input.value = choice.score;
+                    input.addEventListener('change', selectAnswer); // 変更イベントで選択処理
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `choice-${index}`;
+                    label.textContent = choice.text;
+
+                    listItem.appendChild(input);
+                    listItem.appendChild(label);
+                    choicesList.appendChild(listItem);
+                });
+            } else {
+                showResult();
+            }
+        }
+
+        function selectAnswer(event) {
+            totalScore += parseInt(event.target.value);
+            currentQuestionIndex++;
+            // 選択後すぐに次の質問へ、または結果表示
+            setTimeout(() => { // 少し遅延させて視覚的なフィードバックを与える
+                displayQuestion();
+            }, 200);
+        }
+
+        function showResult() {
+            questionScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            const result = results.find(r => totalScore >= r.minScore && totalScore <= r.maxScore);
+
+            resultTitle.textContent = result.title;
+            resultDescription.textContent = result.description;
+        }
+
+        function restartQuiz() {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        }
+
+        function shareOnX() {
+            const currentResultTitle = resultTitle.textContent;
+            const shareText = `私の前世の職業は「${currentResultTitle}」でした！あなたも診断してみませんか？ #前世職業診断`;
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`;
+            window.open(shareUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
