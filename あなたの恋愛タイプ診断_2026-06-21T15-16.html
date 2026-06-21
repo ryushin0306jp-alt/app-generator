@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの恋愛タイプ診断</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            color: #e91e63;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 30px;
+            background-color: #ff6f91;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-weight: 700;
+        }
+
+        .button:hover {
+            background-color: #e91e63;
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .option-button {
+            display: block;
+            width: calc(100% - 20px);
+            padding: 15px 20px;
+            margin: 10px auto;
+            border: 2px solid #ffccdd;
+            border-radius: 10px;
+            background-color: #fff;
+            color: #333;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+            text-align: left;
+        }
+
+        .option-button:hover {
+            background-color: #fff0f5;
+            border-color: #ff9a9e;
+            transform: scale(1.01);
+        }
+
+        .option-button.selected {
+            background-color: #ffebee;
+            border-color: #e91e63;
+            box-shadow: 0 0 8px rgba(233, 30, 99, 0.3);
+            font-weight: 700;
+        }
+
+        .option-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #next-button.disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .share-buttons {
+            margin-top: 30px;
+        }
+
+        .share-buttons a {
+            text-decoration: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+        }
+
+        .share-buttons a:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .share-buttons .x-share {
+            background-color: #000;
+            margin-right: 10px;
+        }
+
+        .share-buttons .x-share::before {
+            content: '𝕏'; /* Xの絵文字、またはSVGアイコンを使う */
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+                border-radius: 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .button, .option-button {
+                font-size: 0.95em;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <!-- スタート画面 -->
+        <div id="start-screen">
+            <h1>あなたの恋愛タイプ診断</h1>
+            <p>いくつかの質問に答えて、あなたの隠れた恋愛タイプを診断しましょう！</p>
+            <button id="start-button" class="button">診断を始める</button>
+        </div>
+
+        <!-- 質問画面 -->
+        <div id="question-screen" class="hidden">
+            <h2 id="question-text"></h2>
+            <div id="options-container">
+                <!-- 選択肢はJSでここに挿入される -->
+            </div>
+            <button id="next-button" class="button disabled" disabled>次の質問へ</button>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="hidden">
+            <h2 id="result-title"></h2>
+            <p id="result-description"></p>
+            <div class="share-buttons">
+                <a id="share-x" class="x-share button" target="_blank" rel="noopener noreferrer">Xでシェア</a>
+            </div>
+            <button id="restart-button" class="button">もう一度診断する</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "週末の過ごし方で一番心が惹かれるのは？",
+                options: [
+                    { text: "A. 読書や映画鑑賞など、一人でゆっくり過ごす", score: 1 },
+                    { text: "B. 友達とカフェに行ったり、グループで食事をする", score: 2 },
+                    { text: "C. 新しい趣味を見つけたり、イベントに参加する", score: 3 },
+                    { text: "D. パートナーや気になる人と二人きりで過ごす", score: 4 }
+                ]
+            },
+            {
+                question: "トラブルが起きたとき、あなたはまずどうする？",
+                options: [
+                    { text: "A. まず自分で解決策を考え、必要なら専門家に相談する", score: 1 },
+                    { text: "B. 信頼できる友人や家族に相談し、アドバイスを求める", score: 2 },
+                    { text: "C. 状況を冷静に分析し、最も効率的な方法を模索する", score: 3 },
+                    { text: "D. パートナーの意��を聞き、二人で協力して解決しようとする", score: 4 }
+                ]
+            },
+            {
+                question: "パートナーに求めることで最も重要なのは？",
+                options: [
+                    { text: "A. お互いの自立を尊重し、適度な距離感を保つこと", score: 1 },
+                    { text: "B. 共通の趣味や話題があり、一緒に楽しめること", score: 2 },
+                    { text: "C. 新しい経験や挑戦を共にし、成長し合えること", score: 3 },
+                    { text: "D. どんな時も寄り添い、深い愛情と信頼で結ばれること", score: 4 }
+                ]
+            },
+            {
+                question: "気になる相手へのアプローチ、あなたはどんなタイプ？",
+                options: [
+                    { text: "A. 相手の様子を伺い、ゆっくりと関係を深めていく", score: 1 },
+                    { text: "B. 積極的に話しかけ、共通点を見つけて距離を縮める", score: 2 },
+                    { text: "C. 自分の魅力や個性をアピールし、相手の興味を引く", score: 3 },
+                    { text: "D. ストレートに気持ちを伝え、真剣な交際を求める", score: 4 }
+                ]
+            },
+            {
+                question: "恋愛において、一番大切にしたいのは？",
+                options: [
+                    { text: "A. 自分の時間や趣味も大切にすること", score: 1 },
+                    { text: "B. 友人関係や社会生活も充実させること", score: 2 },
+                    { text: "C. 新しい刺激や学びがあること", score: 3 },
+                    { text: "D. 安心感と深い絆、そして永続的な関係", score: 4 }
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                minScore: 5,
+                maxScore: 8,
+                title: "マイペースな自由人タイプ",
+                description: "あなたは自分の時間を大切にし、一人の空間を愛するタイプです。恋愛においても、お互いの自立を尊重し、束縛を嫌います。パートナーには、あなたの個性を理解し、適度な距離感を保ってくれる人を求めます。自由な関係の中で深い絆を育むことに喜びを感じるでしょう。"
+            },
+            {
+                minScore: 9,
+                maxScore: 12,
+                title: "共感を求める社交家タイプ",
+                description: "あなたは人との繋が���を大切にし、共感や共有を求めるタイプです。恋愛においても、共通の趣味や話題で盛り上がり、一緒に楽しめる関係を理想とします。友人感覚でいられる、明るく楽しいパートナーが理想です。多くの人と関わることで、あなたの魅力がさらに輝きます。"
+            },
+            {
+                minScore: 13,
+                maxScore: 16,
+                title: "刺激を求める探究者タイプ",
+                description: "あなたは新しいことへの挑戦を好み、常に成長を求めるタイプです。恋愛においても、マンネリを嫌い、新しい刺激や学びを与え合える関係を求めます。共に高め合える、知的好奇心旺盛なパートナーに惹かれます。常に新鮮な気持ちで関係を深めていきたいと願うでしょう。"
+            },
+            {
+                minScore: 17,
+                maxScore: 20,
+                title: "安定を求めるロマンチストタイプ",
+                description: "あなたは深い愛情と絆を大切にし、安定した関係を求めるタイプです。恋愛においては、どんな時も寄り添い、強い信頼関係で結ばれたいと願います。一途で誠実、安心感を与えてくれるパート���ーが理想です。真実の愛を育み、永遠の絆を信じるロマンチストです。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+        let selectedOptionScore = 0; // 現在の質問で選択されたオプションのスコア
+
+        // DOM要素の取得
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startButton = document.getElementById('start-button');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const shareXButton = document.getElementById('share-x');
+        const restartButton = document.getElementById('restart-button');
+
+        // イベントリスナー
+        startButton.addEventListener('click', startGame);
+        nextButton.addEventListener('click', nextQuestion);
+        restartButton.addEventListener('click', restartGame);
+        optionsContainer.addEventListener('click', selectOption);
+
+        function startGame() {
+            startScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            selectedOptionScore = 0;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+            questionText.textContent = `Q${currentQuestionIndex + 1}. ${question.question}`;
+            optionsContainer.innerHTML = ''; // 選択肢をクリア
+
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option.text;
+                button.classList.add('option-button');
+                button.dataset.score = option.score;
+                optionsContainer.appendChild(button);
+            });
+
+            // 「次の質問へ」ボタンの状態をリセット
+            nextButton.classList.add('disabled');
+            nextButton.disabled = true;
+            nextButton.textContent = currentQuestionIndex === questions.length - 1 ? "結果を見る" : "次の質問へ";
+            selectedOptionScore = 0; // 新しい質問に移ったら選択スコアをリセット
+        }
+
+        function selectOption(event) {
+            const clickedButton = event.target.closest('.option-button');
+            if (clickedButton) {
+                // すでに選択されているオプションがあれば解除
+                optionsContainer.querySelectorAll('.option-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                // クリックされたオプションを選択状態にする
+                clickedButton.classList.add('selected');
+                selectedOptionScore = parseInt(clickedButton.dataset.score);
+                
+                // 次へボタンを有効化
+                nextButton.classList.remove('disabled');
+                nextButton.disabled = false;
+            }
+        }
+
+        function nextQuestion() {
+            if (selectedOptionScore === 0) {
+                alert('選択肢を選んでください。');
+                return;
+            }
+
+            totalScore += selectedOptionScore;
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            questionScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            const result = results.find(r => totalScore >= r.minScore && totalScore <= r.maxScore);
+            resultTitle.textContent = `診断結果: ${result.title}`;
+            resultDescription.textContent = result.description;
+
+            // XシェアボタンのURLを設定
+            const shareText = `あなたの恋愛タイプは「${result.title}」でした！\n${result.description.substring(0, 50)}...\n#恋愛タイプ診断 #診断メーカー`;
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`;
+            shareXButton.href = shareUrl;
+        }
+
+        function restartGame() {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            selectedOptionScore = 0;
+            // 質問画面や結果画面の内容もリセットされるため、初期状態に戻る
+        }
+    </script>
+</body>
+</html>

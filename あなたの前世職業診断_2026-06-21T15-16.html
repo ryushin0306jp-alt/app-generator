@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの前世職業診断</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96); /* グラデーション背景 */
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+            margin: 20px 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #3f2b96;
+            margin-bottom: 25px;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        p#question-text {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option, .button {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+        }
+
+        .option {
+            background-color: #f0f0f0;
+            color: #555;
+            text-align: left;
+        }
+
+        .option:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            background-color: #6a11cb; /* 選択されたオプションの色 */
+            color: white;
+            box-shadow: 0 6px 15px rgba(106, 17, 203, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .button {
+            background-color: #6a11cb;
+            color: white;
+            flex: 1;
+        }
+        
+        .button#prev-button {
+            background-color: #7f8c8d;
+        }
+        .button#prev-button:hover {
+            background-color: #95a5a6;
+            transform: translateY(-2px);
+        }
+
+        .button:hover {
+            background-color: #8e2de2;
+            transform: translateY(-2px);
+        }
+
+        .start-button {
+            background-color: #2ecc71;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4);
+        }
+        .start-button:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .result-section {
+            display: none;
+            text-align: center;
+        }
+
+        .result-section h2 {
+            color: #3f2b96;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .result-section p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            white-space: pre-wrap; /* 改行を反映 */
+        }
+
+        .share-button {
+            background-color: #1DA1F2; /* Xのブランドカラー */
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(29, 161, 242, 0.4);
+        }
+
+        .share-button:hover {
+            background-color: #1890e7;
+            transform: translateY(-2px);
+        }
+
+        .share-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            p#question-text {
+                font-size: 1.1em;
+            }
+
+            .option, .button, .share-button, .start-button {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .button {
+                flex: none; /* カラムにした時にflex:1を無効化 */
+            }
+
+            .result-section h2 {
+                font-size: 1.8em;
+            }
+
+            .result-section p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1 id="quiz-title">あなたの前世職業診断</h1>
+
+            <div id="start-screen">
+                <p>簡単な5つの質問に答えるだけで、あなたの前世の職業が分かります。さあ、あなたの隠れたルーツを探ってみましょう！</p>
+                <button id="start-button" class="button start-button">診断を開始する</button>
+            </div>
+
+            <div id="question-section" class="hidden">
+                <p id="question-text"></p>
+                <div id="options-container" class="options">
+                    <!-- 選択肢がJSでここに挿入されます -->
+                </div>
+                <div class="button-group">
+                    <button id="prev-button" class="button hidden">戻る</button>
+                    <button id="next-button" class="button">次へ</button>
+                </div>
+            </div>
+
+            <div id="result-section" class="hidden">
+                <h2 id="result-title"></h2>
+                <p id="result-description"></p>
+                <button id="share-button" class="share-button">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5orgv/MjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTE4LjI0NCAyLjI1aDMuMzAyTDEyIDExLjcxMyAyLjQ1OCAyLjI1SDdMNi41MjMgMy4xMTdsMi45MDQgMy4yO0wxLjgzIDIxLjc1aDMuMzAybDhMMjEuNTYgMi4yNWgtMy4zMDJsLTcuNTM0IDguNTMyeiIvPjwvc3ZnPg==" alt="Xアイコン">
+                    結果をXでシェア
+                </button>
+                <button id="restart-button" class="button">もう一度診断する</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM要素の取得
+        const startScreen = document.getElementById('start-screen');
+        const questionSection = document.getElementById('question-section');
+        const resultSection = document.getElementById('result-section');
+        const startButton = document.getElementById('start-button');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const shareButton = document.getElementById('share-button');
+        const restartButton = document.getElementById('restart-button');
+
+        // 診断データ
+        const questionData = [
+            {
+                question: "1. あなたが最も惹かれる風景は？",
+                options: [
+                    { text: "広大な自然が広がる草原", category: "A" },
+                    { text: "活気あふれる市場の通り", category: "B" },
+                    { text: "静かで荘厳な図書館", category: "C" },
+                    { text: "美しい庭園に囲まれた宮殿", category: "D" }
+                ]
+            },
+            {
+                question: "2. 休日に一番したいことは？",
+                options: [
+                    { text: "新しい場所へ旅に出る", category: "A" },
+                    { text: "友人や仲間と語り合う", category: "B" },
+                    { text: "読書や勉強に没頭する", category: "C" },
+                    { text: "美しい芸術作品に触れる", category: "D" }
+                ]
+            },
+            {
+                question: "3. もし特別な才能を一つ選べるとしたら？",
+                options: [
+                    { text: "動物と心が通じ合う能力", category: "A" },
+                    { text: "人々の心を動かすスピーチ力", category: "B" },
+                    { text: "どんな難問も解決できる知恵", category: "C" },
+                    { text: "美しいものを生み出す創造力", category: "D" }
+                ]
+            },
+            {
+                question: "4. 困難な状況に直面した時、どうしますか？",
+                options: [
+                    { text: "直感を信じて行動する", category: "A" },
+                    { text: "助けを求め、皆で協力する", category: "B" },
+                    { text: "徹底的に情報を集め、分析する", category: "C" },
+                    { text: "自分の美学を貫き、乗り越える", category: "D" }
+                ]
+            },
+            {
+                question: "5. あなたの理想とする生き方は？",
+                options: [
+                    { text: "自由に各地を巡り、多くの経験を積む", category: "A" },
+                    { text: "誰かの役に立ち、社会に貢献する", category: "B" },
+                    { text: "知識を深め、真理を探求する", category: "C" },
+                    { text: "豊かな生活の中で、美を追求する", category: "D" }
+                ]
+            }
+        ];
+
+        const resultData = {
+            "A": {
+                title: "【冒険家・探検家】",
+                description: "あなたは前世で、未知の土地を切り開き、新しい発見に情熱を燃やす冒険家や探検家でした。常に変化を求め、自由を愛する精神は、その頃から培われたのかもしれません。広い世界を舞台に活躍する才能を秘めています。"
+            },
+            "B": {
+                title: "【指導者・奉仕者】",
+                description: "あなたの前世は、人々を導き、社会に貢献する指導者や奉仕者でした。困っている人を助け、コミュニティの和を重んじる心は、その時代から受け継がれています。人々をまとめ、良い方向へ導く力を持っています。"
+            },
+            "C": {
+                title: "【学者・研究者】",
+                description: "あなたは前世で、知識の探求に生涯を捧げた学者や研究者でした。物事の本質を見極め、真理を追求する知的好奇心は、今もあなたの内側に息づいています。深い洞察力で、複雑な問題を解決する才能があります。"
+            },
+            "D": {
+                title: "【芸術家・貴族】",
+                description: "あなたの前世は、美を愛し、文化を育んだ芸術家や貴族でした。洗練された感性と創造力で、人々に感動を与えていたことでしょう。美しいものや上質なものを好み、人生を豊かに彩るセンスに恵まれています。"
+            }
+        };
+
+        // 診断の状態変数
+        let currentQuestionIndex = 0;
+        let answers = []; // 選択されたオプションのcategoryを格納
+
+        // 診断開始
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            questionSection.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            answers = [];
+            displayQuestion();
+        }
+
+        // 質問の表示
+        function displayQuestion() {
+            const question = questionData[currentQuestionIndex];
+            questionText.textContent = question.question;
+            optionsContainer.innerHTML = ''; // 選択肢をクリア
+
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.classList.add('option');
+                button.textContent = option.text;
+                button.dataset.category = option.category; // カテゴリをデータ属性に保存
+                button.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(button);
+            });
+
+            // 選択済みの回答があれば反映
+            if (answers[currentQuestionIndex]) {
+                const selectedCategory = answers[currentQuestionIndex];
+                Array.from(optionsContainer.children).forEach(button => {
+                    if (button.dataset.category === selectedCategory) {
+                        button.classList.add('selected');
+                    }
+                });
+            }
+
+            // ボタンの表示制御
+            prevButton.classList.toggle('hidden', currentQuestionIndex === 0);
+            nextButton.textContent = currentQuestionIndex === questionData.length - 1 ? '結果を見る' : '次へ';
+        }
+
+        // 選択肢の選択
+        function selectOption(optionIndex) {
+            // 現在の質問の選択肢をリセット
+            Array.from(optionsContainer.children).forEach(button => {
+                button.classList.remove('selected');
+            });
+
+            // 選択されたオプションにスタイルを適用
+            optionsContainer.children[optionIndex].classList.add('selected');
+
+            // 選択されたカテゴリを保存
+            answers[currentQuestionIndex] = questionData[currentQuestionIndex].options[optionIndex].category;
+        }
+
+        // 次の質問へ進む
+        function nextQuestion() {
+            if (answers[currentQuestionIndex] === undefined) {
+                alert('選択してください！');
+                return;
+            }
+
+            if (currentQuestionIndex < questionData.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                displayResult();
+            }
+        }
+
+        // 前の質問へ戻る
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        // 結果の計算と表示
+        function calculateResult() {
+            const categoryCounts = { A: 0, B: 0, C: 0, D: 0 };
+            answers.forEach(category => {
+                categoryCounts[category]++;
+            });
+
+            let maxCount = -1;
+            let resultCategory = '';
+            // 最も多く選択されたカテゴリを特定
+            for (const category in categoryCounts) {
+                if (categoryCounts[category] > maxCount) {
+                    maxCount = categoryCounts[category];
+                    resultCategory = category;
+                }
+            }
+            // 同点の場合、最初のカテゴリに偏らないように調整することも可能だが、今回は単純に最初に見つかったものを採用
+            return resultCategory;
+        }
+
+        function displayResult() {
+            questionSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+
+            const finalCategory = calculateResult();
+            const result = resultData[finalCategory];
+
+            resultTitle.textContent = result.title;
+            resultDescription.textContent = result.description;
+            
+            // XシェアボタンのテキストとURLを設定
+            const shareText = `私の前世の職業は…「${result.title}」でした！あなたも診断してみよう！`;
+            const shareUrl = encodeURIComponent(window.location.href);
+            shareButton.onclick = () => {
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${shareUrl}`, '_blank');
+            };
+        }
+
+        // 診断をリセットして最初からやり直す
+        function restartQuiz() {
+            resultSection.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            answers = [];
+        }
+
+        // イベ���トリスナーの登録
+        startButton.addEventListener('click', startQuiz);
+        nextButton.addEventListener('click', nextQuestion);
+        prevButton.addEventListener('click', prevQuestion);
+        restartButton.addEventListener('click', restartQuiz);
+
+        // 初期表示：診断開始画面
+        startScreen.classList.remove('hidden');
+    </script>
+</body>
+</html>
