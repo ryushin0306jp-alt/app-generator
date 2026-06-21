@@ -2,8 +2,8 @@ const fs = require("fs");
 const https = require("https");
 
 const GEMINI_KEYS = [
-  process.env.AQ.Ab8RN6J05uV6SeK7gwy6mVLN-ZePACPbZSNtEOhGjnluTJeYbQ,
-  process.env.AQ.Ab8RN6Lmn6-JXQPQdHF_N2POANZ8a9KUll28fuC2lx9L3shJKA,
+  process.env.GEMINI_KEY_1,
+  process.env.GEMINI_KEY_2,
 ];
 
 let keyIndex = 0;
