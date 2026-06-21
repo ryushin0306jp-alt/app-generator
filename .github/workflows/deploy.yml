@@ -1,0 +1,31 @@
+name: Generate and Deploy
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Run generator
+        env:
+          GEMINI_KEY_1: ${{ secrets.GEMINI_KEY_1 }}
+          GEMINI_KEY_2: ${{ secrets.GEMINI_KEY_2 }}
+        run: node generator.js
+
+      - name: Commit and push
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git add *.html
+          git diff --staged --quiet || git commit -m "auto generate"
+          git push

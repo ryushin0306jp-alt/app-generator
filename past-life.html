@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの前世職業診断</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96); /* グラデーション背景 */
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #ffffff; /* 白いカード */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #3f2b96;
+            margin-bottom: 25px;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option-button {
+            background-color: #e0e7ff;
+            color: #3f2b96;
+            border: 2px solid #a8c0ff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option-button:hover {
+            background-color: #a8c0ff;
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-button.selected {
+            background-color: #3f2b96;
+            color: #ffffff;
+            border-color: #3f2b96;
+        }
+
+        .navigation-buttons button {
+            background-color: #3f2b96;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .navigation-buttons button:hover {
+            background-color: #5d42b9;
+            transform: translateY(-2px);
+        }
+
+        .result-container h2 {
+            color: #3f2b96;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .result-container p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        .share-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #1DA1F2; /* X (Twitter) Blue */
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none; /* aタグの場合 */
+            margin-right: 15px;
+        }
+
+        .share-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .share-button:hover {
+            background-color: #1786C6;
+            transform: translateY(-2px);
+        }
+
+        .restart-button {
+            background-color: #a8c0ff;
+            color: #3f2b96;
+            border: 2px solid #a8c0ff;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease, color 0.3s ease;
+        }
+
+        .restart-button:hover {
+            background-color: #8c9eff;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* レスポンシブデザイン */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            .option-button, .navigation-buttons button, .share-button, .restart-button {
+                font-size: 1em;
+                padding: 12px 18px;
+            }
+            .share-button {
+                margin-right: 10px;
+                margin-bottom: 15px; /* ボタンが縦に並ぶように */
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>あなたの前世職業診断</h1>
+
+        <!-- 診断セクション -->
+        <div id="quiz-section">
+            <div class="question-container">
+                <h2 id="question-text">質問が入ります</h2>
+                <div class="options" id="options-container">
+                    <!-- 選択肢がここに動的に追加されます -->
+                </div>
+            </div>
+            <div class="navigation-buttons">
+                <button id="next-button">次へ</button>
+            </div>
+        </div>
+
+        <!-- 結果セクション -->
+        <div id="result-section" class="hidden">
+            <div class="result-container">
+                <h2>あなたの前世は...<br><span id="result-title"></span>でした！</h2>
+                <p id="result-description"></p>
+                <a id="share-button" class="share-button" target="_blank" rel="noopener noreferrer">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/X_logo_2023.svg/1024px-X_logo_2023.svg.png" alt="X">
+                    結果をXでシェア
+                </a>
+                <button id="restart-button" class="restart-button">もう一度診断する</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "どんな場所で過ごすのが好きですか？",
+                options: [
+                    { text: "自然豊かな場所や、人の少ない静かな場所", type: 'A' },
+                    { text: "美術館や劇場、カフェなど、創造性を刺激される場所", type: 'B' },
+                    { text: "図書館や研究室など、集中して物事を考えられる場所", type: 'C' },
+                    { text: "工房や作業場など、手を使って何かを作り出せる場所", type: 'D' }
+                ]
+            },
+            {
+                question: "どんな作業に喜びを感じますか？",
+                options: [
+                    { text: "人の役に立ったり、困っている人を助けること", type: 'A' },
+                    { text: "新しいアイデアを生み出したり、物語を創作すること", type: 'B' },
+                    { text: "複雑な問題を分析し、論理的な解決策を見つけること", type: 'C' },
+                    { text: "材料を加工し、具体的な形あるものを作り上げること", type: 'D' }
+                ]
+            },
+            {
+                question: "あなたが最も大切にする価値観は何ですか？",
+                options: [
+                    { text: "共感と奉仕", type: 'A' },
+                    { text: "個性と美学", type: 'B' },
+                    { text: "真実と探求", type: 'C' },
+                    { text: "技術と完成度", type: 'D' }
+                ]
+            },
+            {
+                question: "ストレスを感じた時、どうしますか？",
+                options: [
+                    { text: "信頼できる友人や家族に相談し、慰めを求める", type: 'A' },
+                    { text: "音楽を聴いたり、絵を描いたり、想像の世界に没頭する", type: 'B' },
+                    { text: "本を読んだり、深く考えたりして、原因を分析しようとする", type: 'C' },
+                    { text: "体を動かしたり、手作業に集中して気分転換する", type: 'D' }
+                ]
+            },
+            {
+                question: "もし何か新しいことを学ぶなら、何を選びますか？",
+                options: [
+                    { text: "心理学やカウンセリングなど、人間関係のスキル", type: 'A' },
+                    { text: "絵画、音楽、文章などの芸術表現", type: 'B' },
+                    { text: "科学、歴史、哲学などの学問分野", type: 'C' },
+                    { text: "木工、陶芸、プログラミングなどの専門技術", type: 'D' }
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                title: "癒やしの奉仕者",
+                description: "あなたの前世は、人々を癒やし、支え、導くことに喜びを感じる「癒やしの奉仕者」だったようです。医者、教師、聖職者、カウンセラーなど、誰かの心や体を救い、成長を助ける役割を担っていました。あなたは生まれつき共感力が高く、他者の痛みに寄り添う優しい心の持ち主です。現代でも、人を思いやる気持ちがあなたの行動原理になっているでしょう。"
+            },
+            {
+                title: "情熱の芸術家",
+                description: "あなたの前世は、内なる感情や思想を形にする「情熱の芸術家」だったようです。画家、作家、音楽家、詩人、俳優など、創造性を通じて世界にメッセージを発信していました。あなたは美しいものや感動を深く理解し、それを表現する才能に恵まれています。現代でも、独自の視点や豊かな想像力で周囲を魅了していることでしょう。"
+            },
+            {
+                title: "知の探求者",
+                description: "あなたの前世は、真実を追い求め、知識を深める「知の探求者」だったようです。学者、哲学者、探偵、研究者など、論理的な思考力と探究心で世界の謎を解き明かしていました。あなたは物事を深く分析し、本質を見抜く力を持っています。現代でも、知的好奇心が旺盛で、常に学び続けようとする姿勢があるはずです。"
+            },
+            {
+                title: "匠の創造者",
+                description: "あなたの前世は、手と頭を使い、質の高いものを作り出す「匠の創造者」だったようです。建築家、職人、エンジニア、発明家など、実用性と美しさを兼ね備えた作品を生み出していました。あなたは細部へのこだわりと、問題を解決する実践的な能力に優れています。現代でも、物事を形にするのが得意で、手を動かす作業に充実感を得るでしょう。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let selectedOption = null;
+        let scores = { A: 0, B: 0, C: 0, D: 0 }; // 各タイプの前世職業ポイント
+
+        const quizSection = document.getElementById('quiz-section');
+        const resultSection = document.getElementById('result-section');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const shareButton = document.getElementById('share-button');
+        const restartButton = document.getElementById('restart-button');
+
+        function displayQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const questionData = questions[currentQuestionIndex];
+                questionText.textContent = `Q${currentQuestionIndex + 1}. ${questionData.question}`;
+                optionsContainer.innerHTML = ''; // 選択肢をクリア
+
+                questionData.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.classList.add('option-button');
+                    button.textContent = option.text;
+                    button.dataset.type = option.type;
+                    button.addEventListener('click', () => selectOption(button, option));
+                    optionsContainer.appendChild(button);
+                });
+                selectedOption = null; // 選択状態をリセット
+                nextButton.disabled = true; // 選択するまで次へボタンを無効化
+                nextButton.textContent = "次へ";
+            } else {
+                showResult();
+            }
+        }
+
+        function selectOption(button, option) {
+            // 現在の選択をクリア
+            const currentSelected = optionsContainer.querySelector('.option-button.selected');
+            if (currentSelected) {
+                currentSelected.classList.remove('selected');
+            }
+            // 新しい選択をマーク
+            button.classList.add('selected');
+            selectedOption = option;
+            nextButton.disabled = false; // 次へボタンを有効化
+
+            if (currentQuestionIndex === questions.length - 1) {
+                nextButton.textContent = "結果を見る";
+            }
+        }
+
+        function nextQuestion() {
+            if (!selectedOption) {
+                alert('選択肢を選んでください！');
+                return;
+            }
+
+            // スコアを更新
+            scores[selectedOption.type]++;
+
+            currentQuestionIndex++;
+            selectedOption = null; // 次の質問のために選択をリセット
+            displayQuestion();
+        }
+
+        function calculateResult() {
+            let maxScore = -1;
+            let resultType = '';
+            let possibleResults = []; // 同点の場合の候補を保存
+
+            // 最も高いスコアと、そのタイプを特定
+            for (const type in scores) {
+                if (scores[type] > maxScore) {
+                    maxScore = scores[type];
+                    resultType = type;
+                    possibleResults = [type]; // 新しい最大値なので候補をリセット
+                } else if (scores[type] === maxScore && maxScore > 0) {
+                    possibleResults.push(type); // 同点の場合、候補に追加
+                }
+            }
+
+            // 全ての質問に回答がなく、スコアが全て0の場合
+            if (maxScore === 0) {
+                return results[Math.floor(Math.random() * results.length)]; // ランダムな結果を返す
+            }
+
+            // 同点の場合、候補の中からランダムに選択
+            if (possibleResults.length > 1) {
+                resultType = possibleResults[Math.floor(Math.random() * possibleResults.length)];
+            }
+
+            switch (resultType) {
+                case 'A': return results[0]; // 癒やしの奉仕者
+                case 'B': return results[1]; // 情熱の芸術家
+                case 'C': return results[2]; // 知の探求者
+                case 'D': return results[3]; // 匠の創造者
+                default: return results[0]; // デフォルト
+            }
+        }
+
+        function showResult() {
+            quizSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+
+            const finalResult = calculateResult();
+            resultTitle.textContent = finalResult.title;
+            resultDescription.textContent = finalResult.description;
+
+            // Xシェアボタンの設定
+            const tweetText = `私の前世は「${finalResult.title}」でした！あなたは何かな？ #前世職業診断\n`;
+            const appUrl = encodeURIComponent(window.location.href);
+            shareButton.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${appUrl}`;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            selectedOption = null;
+            scores = { A: 0, B: 0, C: 0, D: 0 };
+            quizSection.classList.remove('hidden');
+            resultSection.classList.add('hidden');
+            displayQuestion();
+        }
+
+        // イベントリスナー
+        nextButton.addEventListener('click', nextQuestion);
+        restartButton.addEventListener('click', restartQuiz);
+
+        // 初期表示
+        displayQuestion();
+    </script>
+</body>
+</html>

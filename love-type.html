@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの恋愛タイプ診断</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #e91e63;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        h2 {
+            color: #4CAF50;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        h3 {
+            color: #673AB7;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        p {
+            line-height: 1.7;
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .question-card {
+            margin-bottom: 30px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .option-btn {
+            background-color: #fce4ec;
+            color: #e91e63;
+            border: 2px solid #e91e63;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background-color: #e91e63;
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .action-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .action-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        #start-btn {
+            background-color: #e91e63;
+        }
+        #start-btn:hover {
+            background-color: #d81b60;
+        }
+
+        #restart-btn {
+            background-color: #2196F3;
+            margin-right: 10px;
+        }
+        #restart-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .share-button {
+            background-color: #000000; /* X (旧Twitter) のブランドカラー */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .share-button:hover {
+            background-color: #333333;
+            transform: translateY(-2px);
+        }
+
+        .share-button img {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="intro-section">
+            <h1>あなたの恋愛タイプ診断</h1>
+            <p>簡単な質問に答えるだけで、あなたの隠れた恋愛タイプを診断します。さあ、あなたの恋愛の傾向を探ってみましょう！</p>
+            <button id="start-btn" class="action-button">診断を始める</button>
+        </div>
+
+        <div id="quiz-section" style="display:none;">
+            <div class="question-card">
+                <h3 id="question-text">質問がここに表示されます</h3>
+                <div id="options-container" class="options-container">
+                    <!-- 選択肢ボタンがここに動的に追加されます -->
+                </div>
+            </div>
+        </div>
+
+        <div id="result-section" style="display:none;">
+            <h2 id="result-title">あなたの恋愛タイプは...</h2>
+            <p id="result-description">診断結果の説明がここに表示されます。</p>
+            <button id="restart-btn" class="action-button">もう一度診断する</button>
+            <button id="share-button" class="share-button">
+                <img src="https://www.svgrepo.com/show/503487/x-twitter.svg" alt="Xアイコン">
+                結果をXでシェア
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "週末の過ごし方として、最も理想的なのは？",
+                options: [
+                    { text: "恋人とロマンチックなデートを計画し、実行する", scores: [1, 0, 0, 0] }, // 情熱
+                    { text: "家でまったりと過ごし、恋人と穏やかな時間を楽しむ", scores: [0, 1, 0, 0] }, // 癒し
+                    { text: "友達と趣味の活動やイベントに参加し、新しい���激を求める", scores: [0, 0, 1, 0] }, // 自由
+                    { text: "将来のために資格の勉強や自己投資に時間を使い、時々恋人と過ごす", scores: [0, 0, 0, 1] }  // 堅実
+                ]
+            },
+            {
+                question: "新しい出会いの場で、あなたの行動は？",
+                options: [
+                    { text: "積極的に気になる人に話しかけ、自分の魅力をアピールする", scores: [1, 0, 0, 0] },
+                    { text: "誰かが話しかけてくれるのを待ち、穏やかに会話を楽しむ", scores: [0, 1, 0, 0] },
+                    { text: "色々な人と気軽に交流し、楽しい時間を共有することを重視する", scores: [0, 0, 1, 0] },
+                    { text: "まずは相手の様子を観察し、慎重に話しかけるタイミングを見計らう", scores: [0, 0, 0, 1] }
+                ]
+            },
+            {
+                question: "恋人との意見の食い違いが生じた時、どうしますか？",
+                options: [
+                    { text: "自分の意見をしっか���伝え、相手を説得しようと情熱的に話し合う", scores: [1, 0, 0, 0] },
+                    { text: "相手の意見を尊重し、穏便に解決しようと努力する", scores: [0, 1, 0, 0] },
+                    { text: "あまり深く考えず、お互いの自由を尊重する姿勢を見せる", scores: [0, 0, 1, 0] },
+                    { text: "冷静に論点を整理し、具体的な解決策を話し合って合意形成を目指す", scores: [0, 0, 0, 1] }
+                ]
+            },
+            {
+                question: "サプライズについて、あなたの考えは？",
+                options: [
+                    { text: "サプライズは大好き！自分も仕掛けたいし、相手にもされたい", scores: [1, 0, 0, 0] },
+                    { text: "サプライズは嬉しいけれど、あくまで穏やかな範囲で。準備も一緒にしたい", scores: [0, 1, 0, 0] },
+                    { text: "サプライズも良いけれど、それよりも日常の自由な時間が大切", scores: [0, 0, 1, 0] },
+                    { text: "サプライズよりも、事前に計画され���確実なイベントの方が安心する", scores: [0, 0, 0, 1] }
+                ]
+            },
+            {
+                question: "恋愛における理想の関係は？",
+                options: [
+                    { text: "お互いに情熱的に高め合い、常に新しい刺激を与え合う関係", scores: [1, 0, 0, 0] },
+                    { text: "寄り添い、支え合い、安らぎを感じられる穏やかで安定した関係", scores: [0, 1, 0, 0] },
+                    { text: "お互いの自由を尊重し、束縛せず、それぞれの時間を楽しめる関係", scores: [0, 0, 1, 0] },
+                    { text: "将来を見据え、堅実に歩みを進められる信頼と安心感のある関係", scores: [0, 0, 0, 1] }
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                type: "情熱の炎タイプ",
+                description: "あなたは恋愛に情熱を注ぎ、常に刺激と高揚感を求めるタイプです。相手をリードし、ドラマチックな展開を好みます。感情表現も豊かで、ストレートに愛情を伝えますが、時には相手にも同じ熱量を求めることがあります。退屈を嫌い、常に新しい体験を共有したいと願っています。"
+            },
+            {
+                type: "癒しのオアシスタイプ",
+                description: "あなたは穏やかで包容力があり、相手に安らぎを与える癒し系タイプです。争いを避け、共感することを大切にします。相手の気持ちを察し、優しく寄り添うことで、深い信頼関係を築きます。ただし、自分の意見を主張するのが苦手な一面もあります。安定した心地よい関係を求めます。"
+            },
+            {
+                type: "自由な風タイプ",
+                description: "あなたは束縛を嫌い、自由を愛するタイプです。恋愛においても、お互いの独立した時間や趣味を尊重することを重視します。軽やかでフットワークが軽く、新しいことや刺激的な体験を好みます。一方で、相手との距離感が掴みにくいと感じられたり、深く踏み込まれることを苦手とする場合もあります。"
+            },
+            {
+                type: "堅実な大地タイプ",
+                description: "あなたは安定と信頼を重んじる、堅実なタイプです。恋愛においても、将来を見据えた真剣な関係を求め、計画性があります。約束はきちんと守り、誠実な行動で相手に安心感を与えます。急な変化や衝動的な行動は苦手ですが、一度築いた関係は長く大切にするでしょう。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let scores = [0, 0, 0, 0]; // [情熱, 癒し, 自由, 堅実]
+
+        // DOM要素の取得
+        const introSection = document.getElementById('intro-section');
+        const quizSection = document.getElementById('quiz-section');
+        const resultSection = document.getElementById('result-section');
+        const startBtn = document.getElementById('start-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const restartBtn = document.getElementById('restart-btn');
+        const shareButton = document.getElementById('share-button');
+
+        // イベントリスナー
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', restartQuiz);
+        shareButton.addEventListener('click', shareOnX);
+
+        function startQuiz() {
+            introSection.style.display = 'none';
+            quizSection.style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const questionData = questions[currentQuestionIndex];
+                questionText.textContent = `Q${currentQuestionIndex + 1}. ${questionData.question}`;
+                optionsContainer.innerHTML = ''; // 選択肢をクリア
+
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.classList.add('option-btn');
+                    button.textContent = option.text;
+                    button.addEventListener('click', () => selectOption(option.scores));
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                showResult();
+            }
+        }
+
+        function selectOption(optionScores) {
+            // スコアを加算
+            for (let i = 0; i < scores.length; i++) {
+                scores[i] += optionScores[i];
+            }
+
+            currentQuestionIndex++;
+            loadQuestion(); // 次の質問へ、または結果を表示
+        }
+
+        function showResult() {
+            quizSection.style.display = 'none';
+            resultSection.style.display = 'block';
+
+            const resultTypeIndex = calculateResultType();
+            const finalResult = results[resultTypeIndex];
+
+            resultTitle.textContent = `あなたの恋愛タイプは... ${finalResult.type}！`;
+            resultDescription.textContent = finalResult.description;
+        }
+
+        function calculateResultType() {
+            let maxScore = -1;
+            let resultIndex = 0;
+            for (let i = 0; i < scores.length; i++) {
+                if (scores[i] > maxScore) {
+                    maxScore = scores[i];
+                    resultIndex = i;
+                }
+            }
+            return resultIndex;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            scores = [0, 0, 0, 0];
+            resultSection.style.display = 'none';
+            introSection.style.display = 'block'; // 最初はイントロ画面に戻す
+        }
+
+        function shareOnX() {
+            const resultTypeIndex = calculateResultType();
+            const finalResult = results[resultTypeIndex];
+            const text = `診断結果：私の恋愛タイプは「${finalResult.type}」でした！あなたも診断してみよう！ #恋愛タイプ診断 #心理テスト`;
+            const url = encodeURIComponent(window.location.href);
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`;
+            window.open(shareUrl, '_blank');
+        }
+    </script>
+</body>
+</html>

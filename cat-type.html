@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたに合う猫の種類診断</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap');
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); /* グラデーション背景 */
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: #fff; /* 白いカード */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #e91e63; /* ピンク系のアクセントカラー */
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        h2 {
+            color: #e91e63;
+            margin-top: 0;
+            font-size: 1.6em;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            margin-bottom: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-button {
+            background-color: #ffe0e6;
+            border: 2px solid #e91e63;
+            color: #e91e63;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+        }
+
+        .option-button:hover {
+            background-color: #e91e63;
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        #result-section {
+            display: none; /* 初期状態では非表示 */
+        }
+
+        .result-image {
+            max-width: 80%;
+            height: auto;
+            border-radius: 10px;
+            margin: 25px auto;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .share-button, .restart-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin: 10px;
+            text-decoration: none;
+            border: none;
+        }
+
+        .share-button {
+            background-color: #1DA1F2; /* X (Twitter) Blue */
+            color: #fff;
+        }
+
+        .share-button:hover {
+            background-color: #0c85d0;
+            transform: translateY(-3px);
+        }
+
+        .share-button svg {
+            margin-right: 8px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor; /* SVGアイコンの色を親要素の文字色に合わせる */
+        }
+
+        .restart-button {
+            background-color: #f7a9af;
+            color: #fff;
+        }
+
+        .restart-button:hover {
+            background-color: #e91e63;
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+            .question-text, .option-button {
+                font-size: 1em;
+            }
+            .share-button, .restart-button {
+                padding: 10px 20px;
+                font-size: 1em;
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>あなたに合う猫の種類診断</h1>
+
+        <div id="quiz-section">
+            <h2 id="question-number">質問 1 / 5</h2>
+            <p id="question-text" class="question-text">どんな性格の猫が好きですか？</p>
+            <div id="options-container" class="options-container">
+                <!-- 選択肢はJSで動的に生成されます -->
+            </div>
+        </div>
+
+        <div id="result-section">
+            <h2 id="result-title"></h2>
+            <img id="result-image" class="result-image" src="" alt="診断結果の猫">
+            <p id="result-description"></p>
+            <button id="share-button" class="share-button">
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="r-1nao33i r-4qtqp9 r-yyyyoo r-16y2uox r-8kz0gk r-dnmrzs r-bnwqim r-1plcrux r-lrvibr r-lrsllp"><g><path d="M18.244 2.25h3.308l-7.227 8.26L22 21.75h-3.308l-5.971-6.858L5 21.75H1.692l7.399-8.45L2 2.25h3.308l5.404 6.173L18.244 2.25zm-4.465 14.275L5.196 3.005h2.416l6.573 9.409-2.416 3.461z"></path></g></svg>
+                結果をXでシェア
+            </button>
+            <button id="restart-button" class="restart-button">もう一度診断する</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "どんな性格の猫が好きですか？",
+                options: [
+                    { text: "遊び好きで活発", scores: { "活発で社交的な猫": 1 } },
+                    { text: "静かで独立心が高い", scores: { "穏やかで独立心の高い猫": 1 } },
+                    { text: "甘えん坊で人懐っこい", scores: { "甘えん坊で愛情深い猫": 1 } },
+                    { text: "マイペースで気まぐれ", scores: { "ミステリアスでマイペースな猫": 1 } }
+                ]
+            },
+            {
+                question: "あなたの休日の過ごし方は？",
+                options: [
+                    { text: "アウトドアでアクティブに", scores: { "活発で社交的な猫": 1 } },
+                    { text: "家で読書や映画鑑賞", scores: { "穏やかで独立心の高い猫": 1 } },
+                    { text: "友達とカフェ巡り", scores: { "甘えん坊で愛情深い猫": 1 } },
+                    { text: "一人でゆっくり過ごす", scores: { "ミステリアスでマイペースな猫": 1 } }
+                ]
+            },
+            {
+                question: "猫との暮らしで何を重視しますか？",
+                options: [
+                    { text: "一緒に遊ぶ時間", scores: { "活発で社交的な猫": 1 } },
+                    { text: "お互いのプライベート空間", scores: { "穏やかで独立心の高い���": 1 } },
+                    { text: "スキンシップや癒し", scores: { "甘えん坊で愛情深い猫": 1 } },
+                    { text: "自分のペースで世話できること", scores: { "ミステリアスでマイペースな猫": 1 } }
+                ]
+            },
+            {
+                question: "あなたの部屋の雰囲気は？",
+                options: [
+                    { text: "カラフルで賑やか", scores: { "活発で社交的な猫": 1 } },
+                    { text: "シンプルで落ち着いた", scores: { "穏やかで独立心の高い猫": 1 } },
+                    { text: "温かみがあり居心地が良い", scores: { "甘えん坊で愛情深い猫": 1 } },
+                    { text: "個性的でアーティスティック", scores: { "ミステリアスでマイペースな猫": 1 } }
+                ]
+            },
+            {
+                question: "猫にどんな役割を期待しますか？",
+                options: [
+                    { text: "毎日を楽しくしてくれるパートナー", scores: { "活発で社交的な猫": 1 } },
+                    { text: "そばにいてくれる癒しの存在", scores: { "穏やかで独立心の高い猫": 1 } },
+                    { text: "心を通わせる大切な家族", scores: { "甘えん坊で愛情深い猫": 1 } },
+                    { text: "見守ってくれる同居人", scores: { "ミステリアスでマイペースな猫": 1 } }
+                ]
+            }
+        ];
+
+        const results = {
+            "活発で社交的な猫": {
+                title: "アメリカンショートヘアタイプ！",
+                description: "あなたは遊び好きでアクティブな猫にぴったり！好奇心旺盛で人懐っこいアメリカンショートヘアのような猫と、毎日楽しく刺激的な生活を送れるでしょう。一緒に遊ぶ時間をたくさん作ってあげてくださいね。",
+                image: "https://placehold.jp/300x200/ffb3ba/ffffff?text=活発な猫" 
+            },
+            "穏やかで独立心の高い猫": {
+                title: "ロシアンブルータイプ！",
+                description: "あなたは静かで落ち着いた猫にぴったり！優雅で独立心の高いロシアンブルーのような猫と、お互いのペースを尊重しながら穏やかな時間を過ごせるでしょう。たまには甘えてくるギャップも魅力です。",
+                image: "https://placehold.jp/300x200/a7d9d9/ffffff?text=穏やかな猫"
+            },
+            "甘えん坊で愛情深い猫": {
+                title: "スコティッシュフォールドタイプ！",
+                description: "あなたは愛情深く、甘えん坊な猫にぴったり！愛らしい姿で飼い主を癒してくれるスコティッシュフォールドのような猫と、心温まる毎日を送れるでしょう。たくさんのスキンシップで絆を深めてください。",
+                image: "https://placehold.jp/300x200/ffef96/ffffff?text=甘えん坊な猫"
+            },
+            "ミステリアスでマイペースな猫": {
+                title: "ベンガルタイプ！",
+                description: "あなたは個性的で知的な猫にぴったり！野性味あふれるベンガル猫のように、予測不可能な行動であなたを魅了するでし���う。適度な距離感を保ちつつ、そのユニークな個性を楽しんでください。",
+                image: "https://placehold.jp/300x200/c7d363/ffffff?text=マイペースな猫"
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = {
+            "活発で社交的な猫": 0,
+            "穏やかで独立心の高い猫": 0,
+            "甘えん坊で愛情深い猫": 0,
+            "ミステリアスでマイペースな猫": 0
+        };
+
+        const quizSection = document.getElementById('quiz-section');
+        const resultSection = document.getElementById('result-section');
+        const questionNumberElem = document.getElementById('question-number');
+        const questionTextElem = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const resultTitleElem = document.getElementById('result-title');
+        const resultImageElem = document.getElementById('result-image');
+        const resultDescriptionElem = document.getElementById('result-description');
+        const shareButton = document.getElementById('share-button');
+        const restartButton = document.getElementById('restart-button');
+
+        function displayQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                questionNumberElem.textContent = `質問 ${currentQuestionIndex + 1} / ${questions.length}`;
+                questionTextElem.textContent = q.question;
+                optionsContainer.innerHTML = ''; // 既存の選択肢をクリア
+
+                q.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.classList.add('option-button');
+                    button.textContent = option.text;
+                    // スコアデータを埋め込む（直接JSON文字列として渡す）
+                    button.dataset.scores = JSON.stringify(option.scores);
+                    button.addEventListener('click', () => selectAnswer(option.scores));
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                displayResult();
+            }
+        }
+
+        function selectAnswer(answerScores) {
+            for (const type in answerScores) {
+                if (scores.hasOwnProperty(type)) {
+                    scores[type] += answerScores[type];
+                }
+            }
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+
+        function displayResult() {
+            quizSection.style.display = 'none';
+            resultSection.style.display = 'block';
+
+            let maxScore = -1;
+            let resultType = "";
+
+            for (const type in scores) {
+                if (scores[type] > maxScore) {
+                    maxScore = scores[type];
+                    resultType = type;
+                }
+            }
+
+            // 同点の場合、複数のタイプに合う可能性もあるが、ここでは最もスコアが高かった最初のタイプを採用
+            const finalResult = results[resultType];
+            resultTitleElem.textContent = `あなたに合う猫は... ${finalResult.title}`;
+            resultDescriptionElem.textContent = finalResult.description;
+            resultImageElem.src = finalResult.image;
+            resultImageElem.alt = finalResult.title;
+
+            // XシェアボタンのURL生成
+            const shareText = `診断結果：「あなたに合う猫は... ${finalResult.title}」でした！あなたも診断してみよう！`;
+            const shareUrl = window.location.href; // 現在のページのURL
+            shareButton.onclick = () => {
+                const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+                window.open(tweetUrl, '_blank');
+            };
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            scores = {
+                "活発で社交的な猫": 0,
+                "穏やかで独立心の高い猫": 0,
+                "甘えん坊で愛情深い猫": 0,
+                "ミステリアスでマイペースな猫": 0
+            };
+            quizSection.style.display = 'block';
+            resultSection.style.display = 'none';
+            displayQuestion();
+        }
+
+        // 初期表示
+        displayQuestion();
+        restartButton.addEventListener('click', restartQuiz);
+
+    </script>
+</body>
+</html>
