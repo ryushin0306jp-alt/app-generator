@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたに合う猫の種類診断</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); /* グラデーション背景 */
+            color: #333;
+            overflow-y: auto; /* コンテンツがはみ出た場合にスクロール */
+        }
+
+        .container {
+            background-color: #ffffff; /* 白いカード */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            color: #6a0dad;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .question-section, .result-section {
+            display: none; /* 初期状態では非表示 */
+        }
+
+        .question-section.active, .result-section.active {
+            display: block; /* アクティブなセクションを表示 */
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            margin-bottom: 30px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .option-label {
+            display: block;
+            background-color: #f0f0f0;
+            padding: 18px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            font-size: 1.1em;
+            color: #444;
+            border: 1px solid #e0e0e0;
+        }
+
+        .option-label:hover {
+            background-color: #e6e6e6;
+            transform: translateY(-2px);
+        }
+
+        .option-input[type="radio"] {
+            display: none; /* ラジオボタン自体を非表示 */
+        }
+
+        .option-input[type="radio"]:checked + .option-label {
+            background-color: #e0b0ff; /* 選択時の背景色 */
+            border-color: #b366ff;
+            color: #333;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #8a2be2;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            width: 100%;
+            max-width: 250px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #6a0dad;
+            transform: translateY(-2px);
+        }
+
+        .result-title {
+            font-size: 2em;
+            color: #6a0dad;
+            margin-bottom: 20px;
+        }
+
+        .result-description {
+            font-size: 1.2em;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .cat-image {
+            max-width: 80%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .share-button {
+            background-color: #1da1f2; /* Xのブランドカラー */
+            margin-top: 15px;
+        }
+
+        .share-button:hover {
+            background-color: #0d8ddb;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .question-text {
+                font-size: 1.2em;
+            }
+            .option-label {
+                padding: 15px 20px;
+                font-size: 1em;
+            }
+            button {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+            .result-title {
+                font-size: 1.8em;
+            }
+            .result-description {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>あなたに合う猫の種類診断</h1>
+
+        <!-- 質問セクション -->
+        <div id="quiz-section" class="question-section active">
+            <div id="question-display">
+                <!-- 質問と選択肢がJavaScriptによってここに表示されます -->
+            </div>
+            <button id="next-button">次へ</button>
+        </div>
+
+        <!-- 結果セクション -->
+        <div id="result-section" class="result-section">
+            <h2 id="result-title" class="result-title"></h2>
+            <img id="cat-image" class="cat-image" src="" alt="診断結果の猫" style="display: none;">
+            <p id="result-description" class="result-description"></p>
+            <button id="share-button" class="share-button" style="display: none;">結果をXでシェア</button>
+            <button id="restart-button">もう一度診断する</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                text: "週末の理想の過ごし方は？",
+                options: [
+                    { text: "家でまったり、読書や映画鑑賞", scores: { typeA: 2, typeC: 1, typeD: 0, typeB: 0 } },
+                    { text: "新しい場所に冒険！アクティブに出かけたい", scores: { typeB: 2, typeA: 0, typeC: 0, typeD: 1 } },
+                    { text: "友人と語り合う静かな時間", scores: { typeD: 2, typeC: 1, typeA: 0, typeB: 0 } },
+                    { text: "予定を決めず、気の向くままに過ごす", scores: { typeA: 1, typeB: 1, typeC: 1, typeD: 1 } }
+                ]
+            },
+            {
+                text: "困難な状況に直面した時、どうしますか？",
+                options: [
+                    { text: "一人でじっくり考えて解決策を探す", scores: { typeC: 2, typeD: 1, typeA: 0, typeB: 0 } },
+                    { text: "助けを求め、周囲の人と協力する", scores: { typeD: 2, typeA: 1, typeC: 0, typeB: 0 } },
+                    { text: "まず行動！試行錯誤しながら進む", scores: { typeB: 2, typeA: 1, typeC: 0, typeD: 0 } },
+                    { text: "時間が解決してくれるのを待つ", scores: { typeA: 2, typeC: 1, typeB: 0, typeD: 0 } }
+                ]
+            },
+            {
+                text: "どんな時に幸せを感じますか？",
+                options: [
+                    { text: "好きな人とのんびり過ごす時間", scores: { typeA: 2, typeD: 1, typeC: 0, typeB: 0 } },
+                    { text: "新しい発見や学びがあった時", scores: { typeB: 2, typeC: 1, typeA: 0, typeD: 0 } },
+                    { text: "周囲から信頼され、頼りにされた時", scores: { typeD: 2, typeC: 1, typeA: 0, typeB: 0 } },
+                    { text: "自分のペースで自由に過ごせる時", scores: { typeA: 1, typeB: 1, typeC: 1, typeD: 1 } }
+                ]
+            },
+            {
+                text: "ストレス解消法は？",
+                options: [
+                    { text: "好きな音楽を聴いたり、美味しいものを食べたり", scores: { typeA: 2, typeD: 1, typeC: 0, typeB: 0 } },
+                    { text: "運動したり、趣味に没頭する", scores: { typeB: 2, typeC: 1, typeA: 0, typeD: 0 } },
+                    { text: "一人で静かに瞑想や思考にふける", scores: { typeC: 2, typeA: 1, typeB: 0, typeD: 0 } },
+                    { text: "信頼できる人に話を聞いてもらう", scores: { typeD: 2, typeB: 1, typeA: 0, typeC: 0 } }
+                ]
+            },
+            {
+                text: "あなたの周りの人から、どんな人だと言われることが多いですか？",
+                options: [
+                    { text: "おっとりしている、マイペース", scores: { typeA: 2, typeD: 1, typeC: 0, typeB: 0 } },
+                    { text: "好奇心旺盛、行動力がある", scores: { typeB: 2, typeA: 1, typeC: 0, typeD: 0 } },
+                    { text: "落ち着いている、賢い", scores: { typeC: 2, typeB: 1, typeA: 0, typeD: 0 } },
+                    { text: "感受性が豊か、優しい", scores: { typeD: 2, typeC: 1, typeA: 0, typeB: 0 } }
+                ]
+            }
+        ];
+
+        const results = {
+            typeA: {
+                title: "穏やかで甘えん坊な猫 (例: スコティッシュフォールド)",
+                description: "あなたは穏やかでマイペース。人との触れ合いを大切にし、リラックスした時間を好むタイプです。少し甘えん坊なスコティッシュフォールドのように、安心できる環境でゆっくりと過ごすのがお気に入りでしょう。",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Scottish_Fold_-_folded_ears.jpg/800px-Scottish_Fold_-_folded_ears.jpg"
+            },
+            typeB: {
+                title: "活発で好奇心旺盛な猫 (例: アビシニアン)",
+                description: "あなたは新しいことへの探究心が強く、アクティブな毎日を送り���いタイプ。遊び好きで好奇心旺盛なアビシニアンのように、毎日が発見と冒険に満ちています。一緒に遊べる猫が最高のパートナーになるでしょう。",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Red_Abyssinian.jpg/800px-Red_Abyssinian.jpg"
+            },
+            typeC: {
+                title: "クールで知的な猫 (例: ロシアンブルー)",
+                description: "あなたは落ち着いていて、物事を深く考えるのが得意な知的派。ロシアンブルーのように、一見クールに見えますが、内面には豊かな感情を秘めています。静かな環境で、お互いの空間を尊重できる関係を望むでしょう。",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Russian_Blue_cat_male.JPG/800px-Russian_Blue_cat_male.JPG"
+            },
+            typeD: {
+                title: "繊細で愛情深い猫 (例: ラグドール)",
+                description: "あなたは感受性が豊かで、人との絆を深く求めるタイプ。愛情深く、穏やかなラグドールのように、信頼できる相手には心を開き、深い愛情を注ぎます。繊細な心を持つ猫が、あなたの優しい気持ちに応えてくれるでし��う。",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Adult_Ragdoll.jpg/800px-Adult_Ragdoll.jpg"
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let currentScores = { typeA: 0, typeB: 0, typeC: 0, typeD: 0 };
+        let selectedOptionForCurrentQuestion = null; // 現在の質問で選択されたオプション
+
+        const quizSection = document.getElementById('quiz-section');
+        const resultSection = document.getElementById('result-section');
+        const questionDisplay = document.getElementById('question-display');
+        const nextButton = document.getElementById('next-button');
+        const resultTitle = document.getElementById('result-title');
+        const catImage = document.getElementById('cat-image');
+        const resultDescription = document.getElementById('result-description');
+        const shareButton = document.getElementById('share-button');
+        const restartButton = document.getElementById('restart-button');
+
+        function renderQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const question = questions[currentQuestionIndex];
+                questionDisplay.innerHTML = `
+                    <p class="question-text">${question.text}</p>
+                    <div class="options">
+                        ${question.options.map((option, index) => `
+                            <input type="radio" id="q${currentQuestionIndex}-option${index}" name="question${currentQuestionIndex}" class="option-input" value="${index}">
+                            <label for="q${currentQuestionIndex}-option${index}" class="option-label">${option.text}</label>
+                        `).join('')}
+                    </div>
+                `;
+
+                // ラジオボタンの変更イベントリスナーを設定
+                document.querySelectorAll(`input[name="question${currentQuestionIndex}"]`).forEach(radio => {
+                    radio.addEventListener('change', (event) => {
+                        selectedOptionForCurrentQuestion = parseInt(event.target.value);
+                        nextButton.disabled = false; // 選択したらボタンを有効化
+                    });
+                });
+                
+                nextButton.textContent = currentQuestionIndex === questions.length - 1 ? "結果を見る" : "次へ";
+                nextButton.disabled = true; // 次の質問に進む前に選択を必須にする
+                selectedOptionForCurrentQuestion = null; // リセット
+            }
+        }
+
+        function calculateScores() {
+            if (selectedOptionForCurrentQuestion !== null) {
+                const selectedOption = questions[currentQuestionIndex].options[selectedOptionForCurrentQuestion];
+                for (const type in selectedOption.scores) {
+                    currentScores[type] += selectedOption.scores[type];
+                }
+            }
+        }
+
+        function showResult() {
+            quizSection.classList.remove('active');
+            resultSection.classList.add('active');
+
+            let maxScore = -1;
+            let bestMatch = '';
+
+            for (const type in currentScores) {
+                if (currentScores[type] > maxScore) {
+                    maxScore = currentScores[type];
+                    bestMatch = type;
+                }
+            }
+
+            const finalResult = results[bestMatch];
+            resultTitle.textContent = finalResult.title;
+            resultDescription.textContent = finalResult.description;
+            catImage.src = finalResult.image;
+            catImage.alt = finalResult.title;
+            catImage.style.display = 'block'; // 画像を表示
+
+            // Xシェアボタン
+            const shareText = `あなたにぴったりの猫は「${finalResult.title}」でした！\n${finalResult.description.substring(0, 50)}...\n#猫種類診断 #猫診断`;
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`;
+            shareButton.onclick = () => window.open(shareUrl, '_blank');
+            shareButton.style.display = 'block';
+        }
+
+        nextButton.addEventListener('click', () => {
+            if (selectedOptionForCurrentQuestion === null) {
+                alert("選択肢を選んでください！");
+                return;
+            }
+
+            calculateScores();
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                showResult();
+            }
+        });
+
+        restartButton.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            currentScores = { typeA: 0, typeB: 0, typeC: 0, typeD: 0 };
+            selectedOptionForCurrentQuestion = null;
+
+            resultSection.classList.remove('active');
+            quizSection.classList.add('active');
+            catImage.style.display = 'none'; // 画像を非表示
+            shareButton.style.display = 'none'; // シェアボタンを非表示
+            renderQuestion();
+        });
+
+        // 初回レンダリング
+        renderQuestion();
+    </script>
+</body>
+</html>

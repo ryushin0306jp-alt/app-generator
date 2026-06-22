@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの恋愛タイプ診断</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right top, #ffecd2 0%, #fcb69f 100%); /* グラデーション背景 */
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #app-container {
+            background-color: #ffffff; /* 白いカード */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+            box-sizing: border-box;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #ff6f61; /* テーマカラー */
+            margin-bottom: 20px;
+            font-size: 2.2em;
+        }
+
+        h2 {
+            color: #ff8a80;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #ff6f61;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 20px;
+            text-decoration: none; /* Aタグの場合 */
+        }
+
+        .button:hover {
+            background-color: #e55c50;
+            transform: translateY(-2px);
+        }
+
+        .options-container label {
+            display: block;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+            font-size: 1.1em;
+        }
+
+        .options-container label:hover {
+            background-color: #ffe0e0;
+            border-color: #ff6f61;
+            transform: scale(1.01);
+        }
+
+        .options-container input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #ff6f61; /* ラジオボタンの色 */
+            transform: scale(1.2); /* 少し大きく */
+        }
+
+        #result-description {
+            margin-top: 25px;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        #share-button {
+            background-color: #1DA1F2; /* X (Twitter) Blue */
+            margin-right: 10px;
+        }
+
+        #share-button:hover {
+            background-color: #0d8ee4;
+        }
+
+        /* 画面の表示/非表示 */
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #app-container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+            .button {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+            .options-container label {
+                padding: 12px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <!-- 開始画面 -->
+        <div id="start-screen">
+            <h1>あなたの恋愛タイプ診断</h1>
+            <p>簡単な質問に答えるだけで、あなたの隠れた恋愛タイプを診断します。</p>
+            <button class="button" onclick="startQuiz()">診断を始める</button>
+        </div>
+
+        <!-- 質問画面 -->
+        <div id="question-screen" class="hidden">
+            <h2 id="question-text"></h2>
+            <div class="options-container" id="options-container">
+                <!-- 選択肢がここに動的に挿入さ��ます -->
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="hidden">
+            <h1>診断結果</h1>
+            <h2 id="result-title"></h2>
+            <p id="result-description"></p>
+            <button id="share-button" class="button" onclick="shareOnX()">Xで結果をシェア</button>
+            <button class="button" onclick="restartQuiz()">もう一度診断する</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "恋人と過ごす理想的な休日の過ごし方は？",
+                options: [
+                    { text: "二人きりで家でまったり映画鑑賞", score: 1 },
+                    { text: "話題のカフェやお店を巡るデート", score: 2 },
+                    { text: "アクティブに旅行やアウトドアを楽しむ", score: 3 },
+                    { text: "それぞれの時間を大切にしつつ、夜は一緒に過ごす", score: 4 }
+                ]
+            },
+            {
+                question: "恋人に求める一番大切なことは？",
+                options: [
+                    { text: "一緒にいる時間が多いこと", score: 1 },
+                    { text: "共通の趣味や話題があること", score: 2 },
+                    { text: "お互いに高め合える関係であること", score: 3 },
+                    { text: "精神的に支え合える安心感", score: 4 }
+                ]
+            },
+            {
+                question: "恋人との喧嘩、どのように解決したい？",
+                options: [
+                    { text: "すぐに話し合って仲直りしたい", score: 1 },
+                    { text: "相手の意見も聞きつつ、納得いくまで話し合う", score: 2 },
+                    { text: "少し時間を置いて冷静になってから話す", score: 3 },
+                    { text: "基本的に喧嘩はしたくない、穏便に済ませたい", score: 4 }
+                ]
+            },
+            {
+                question: "恋人からの愛情表現で一番嬉しいのは？",
+                options: [
+                    { text: "頻繁な連絡や「好き」という言葉", score: 1 },
+                    { text: "サプライズやプレゼント", score: 2 },
+                    { text: "困っている時にそっと手を差し伸べてくれる���と", score: 3 },
+                    { text: "自分の意見や考えを尊重してくれること", score: 4 }
+                ]
+            },
+            {
+                question: "恋愛において、最も恐れることは何ですか？",
+                options: [
+                    { text: "浮気や裏切り", score: 1 },
+                    { text: "マンネリ化して刺激がなくなること", score: 2 },
+                    { text: "自分の意見を言えずに我慢してしまうこと", score: 3 },
+                    { text: "相手の気持ちが分からなくなること", score: 4 }
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                title: "【依存型】甘えん坊タイプ",
+                description: "あなたは恋人と常に一緒にいたい、尽くしたいと願う甘えん坊タイプ。愛情表現が豊かで、相手にも同じくらいの愛情を求めます。独りになることを恐れ、恋人に依存しがちですが、その分、一途で深い愛情を注ぎます。"
+            },
+            {
+                title: "【共感型】ムードメーカータイプ",
+                description: "あなたは恋人と楽しい時間を共有したい、共感し合いたいと願うムードメーカータイプ。デートプランを考えたり、サプライズを仕掛けたりするのが得意で、二人の関係に常に新鮮な風を吹き込みます。ただ、意見の食い違いには少し弱いかもしれません。"
+            },
+            {
+                title: "【成長型】切磋琢磨タイプ",
+                description: "あなたは恋人とお互いに成長し合える関係を理想とする切磋琢磨タイプ。一緒に新しいことに挑戦したり、それぞれの目標に向かって努力することを喜びます。自立心も高く、相手にも同じように向上心を求めます。時にはストイックになりすぎることも。"
+            },
+            {
+                title: "【自立型】穏やか見守りタイプ",
+                description: "あなたは恋人との間に適度な距離感を保ち、お互いの自立を尊重する穏やか見守りタイプ。深い信頼関係を築き、精神的な繋がりを重視します。激しい感情のぶつかり合いよりも、穏やかで安定した関係を好みます。しかし、相手からは少しクールに見られることもあるかもしれません。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                questionText.textContent = `Q${currentQuestionIndex + 1}. ${q.question}`;
+                optionsContainer.innerHTML = ''; // 以前の選択肢をクリア
+
+                q.options.forEach((option) => {
+                    const label = document.createElement('label');
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = 'question-option';
+                    input.value = option.score;
+                    input.onclick = () => selectAnswer(parseInt(input.value)); // クリックでスコア追加
+                    
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(option.text));
+                    optionsContainer.appendChild(label);
+                });
+            } else {
+                showResult();
+            }
+        }
+
+        function selectAnswer(score) {
+            totalScore += score;
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function showResult() {
+            questionScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            let resultTypeIndex;
+            // スコア範囲: 5 (1*5) から 20 (4*5)
+            // 4つの結果に分割:
+            // 5-8点: Type 0
+            // 9-12点: Type 1
+            // 13-16点: Type 2
+            // 17-20点: Type 3
+            if (totalScore <= 8) {
+                resultTypeIndex = 0;
+            } else if (totalScore <= 12) {
+                resultTypeIndex = 1;
+            } else if (totalScore <= 16) {
+                resultTypeIndex = 2;
+            } else {
+                resultTypeIndex = 3;
+            }
+
+            const finalResult = results[resultTypeIndex];
+            resultTitle.textContent = finalResult.title;
+            resultDescription.textContent = finalResult.description;
+        }
+
+        function restartQuiz() {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            totalScore = 0;
+        }
+
+        function shareOnX() {
+            const currentResultTitle = resultTitle.textContent;
+            const currentResultDescription = resultDescription.textContent;
+            const shareText = `診断結果は「${currentResultTitle}」でした！\n${currentResultDescription.substring(0, Math.min(currentResultDescription.length, 70))}...\n#恋愛タイプ診断 #診断メーカー`;
+            const shareUrl = encodeURIComponent(window.location.href);
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${shareUrl}`;
+            window.open(twitterUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
