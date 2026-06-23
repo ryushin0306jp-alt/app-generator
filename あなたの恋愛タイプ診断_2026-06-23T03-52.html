@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの恋愛タイプ診断</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #f06, #4a00e0); /* グラデーション背景 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.95); /* 白いカード */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.8s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1, h2 {
+            color: #4a00e0;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        p {
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .button {
+            background-color: #f06;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 20px;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            background-color: #d10052;
+            transform: translateY(-2px);
+        }
+
+        .question-options {
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        .option-label {
+            display: block;
+            background-color: #eee;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1.05em;
+            position: relative;
+            padding-left: 50px; /* スペース確保 */
+        }
+
+        .option-label:hover {
+            background-color: #e0e0e0;
+            transform: translateX(5px);
+        }
+
+        .option-label input[type="radio"] {
+            display: none; /* デフォルトのラジオボタンを隠す */
+        }
+
+        .option-label span.custom-radio {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #aaa;
+            border-radius: 50%;
+            background-color: white;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .option-label input[type="radio"]:checked + span.custom-radio {
+            border-color: #f06;
+            background-color: #f06;
+        }
+
+        .option-label input[type="radio"]:checked + span.custom-radio::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: white;
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #result-text {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            white-space: pre-wrap; /* 改行を有効にする */
+        }
+
+        .share-button {
+            background-color: #1DA1F2; /* Xのブランドカラー */
+            margin-right: 15px;
+        }
+
+        .share-button:hover {
+            background-color: #0c85d0;
+        }
+
+        .share-button img {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <!-- 導入画面 -->
+        <div id="intro-screen">
+            <h1>あなたの恋愛タイプ診断</h1>
+            <p>簡単な5つの質問に��えて、あなたの隠れた恋愛タイプを診断しましょう！</p>
+            <button class="button" onclick="startQuiz()">診断を始める</button>
+        </div>
+
+        <!-- 質問画面 -->
+        <div id="quiz-screen" class="hidden">
+            <h2 id="question-text"></h2>
+            <div id="options-container" class="question-options">
+                <!-- 選択肢がここに動的に挿入されます -->
+            </div>
+            <button class="button" onclick="nextQuestion()" id="next-button">次の質問へ</button>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="hidden">
+            <h2 id="result-title"></h2>
+            <p id="result-text"></p>
+            <a id="share-x-button" class="button share-button" target="_blank" rel="noopener noreferrer">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/X_logo_2023.svg" alt="X"> Xでシェアする
+            </a>
+            <button class="button" onclick="retryQuiz()">もう一度診断する</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Q1. 恋人とのデート、どんな場所を選ぶ？",
+                options: [
+                    { text: "おしゃれなカフェやレストラン", score: 1 },
+                    { text: "2人の思い出の場所や家", score: 2 },
+                    { text: "テーマパークやアクティブな場所", score: 3 },
+                    { text: "美術館や静かな公園", score: 4 }
+                ]
+            },
+            {
+                question: "Q2. 恋人へのプレゼント、選ぶポイントは？",
+                options: [
+                    { text: "最新トレンドやブランド品", score: 1 },
+                    { text: "手作りのものやメッセージを添える", score: 2 },
+                    { text: "実用的なものや一緒に楽しめる体験", score: 3 },
+                    { text: "落ち着いた色合いや長く使えるもの", score: 4 }
+                ]
+            },
+            {
+                question: "Q3. 恋人との喧嘩、どう解決する？",
+                options: [
+                    { text: "まずは自分の意見をはっきり伝える", score: 1 },
+                    { text: "時間を置いてから、ゆっくり話し合う", score: 2 },
+                    { text: "相手が納得するまで謝るか、笑顔で許しを請う", score: 3 },
+                    { text: "感情的にならず、論理的に解決策を探る", score: 4 }
+                ]
+            },
+            {
+                question: "Q4. 恋人との連絡頻度は？",
+                options: [
+                    { text: "毎日何回も、常に繋がっていたい", score: 1 },
+                    { text: "毎日1回は連絡を取るようにする", score: 2 },
+                    { text: "用事があれば連絡、基本は相手に任せる", score: 3 },
+                    { text: "気が向いた時に連絡、お互いの時間を尊重したい", score: 4 }
+                ]
+            },
+            {
+                question: "Q5. 恋人から褒められたい言葉は？",
+                options: [
+                    { text: "「さすがだね」「センスがいいね」", score: 1 },
+                    { text: "「一緒にいると落ち着く」「安心する」", score: 2 },
+                    { text: "「楽しい！」「君といるといつも笑顔になる」", score: 3 },
+                    { text: "「賢いね」「いつもありがとう」", score: 4 }
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                minScore: 5,
+                maxScore: 8,
+                title: "リードする情熱家タイプ",
+                description: "あなたは恋愛において、常に主導権を握りたい情熱家。新しいことにも積極的で、恋人を引っ張っていくのが得意です。刺激的な恋愛を求める傾向があります。情熱的でロマンチックな一面も持っており、恋人を楽しませることに喜びを感じます。しかし、時に意見を押し付けがちになることもあるので、相手の意見にも耳を傾けることを意識すると、より良い関係を築けるでしょう。"
+            },
+            {
+                minScore: 9,
+                maxScore: 12,
+                title: "寄り添う安定志向タイプ",
+                description: "恋人との心の繋がりや安定を重視するタイプ。穏やかで落ち着いた関係を好み、相手に寄り添い、支えることで幸福を感じます。深い絆を育むことを大切にし、献身的に相手を想うことができます。争いを避ける傾向があり、優しさで包み込むような恋愛が得意です。安定を求めるあまり、変化を恐れることがあ��かもしれませんが、時には新しい挑戦も関係を深めるきっかけになります。"
+            },
+            {
+                minScore: 13,
+                maxScore: 16,
+                title: "楽しいムードメーカータイプ",
+                description: "恋愛は「楽しいもの！」と考えている陽気なタイプ。一緒にいる時間を最高に楽しくしたいという気持ちが強く、笑顔やサプライズで相手を喜ばせます。アクティブなデートが好きで、退屈とは無縁の楽しい関係を築くのが得意です。持ち前の明るさで、どんな時も関係をポジティブに保とうと努力します。ただ、時に深刻な話から逃げがちになることもあるので、真剣に向き合う姿勢も大切です。"
+            },
+            {
+                minScore: 17,
+                maxScore: 20,
+                title: "独立した知性派タイプ",
+                description: "恋愛においても、お互いの自立と尊重を大切にする知性派。ベタベタした関係よりも、適度な距離感を保ちつつ、深く理解し合える関係を求めます。落ち着いた大人の恋愛を好み、相手の個性や自由を尊重します。知的な会話や共通の趣味を通じて、精神的な繋��りを重視します。一見クールに見えるかもしれませんが、心の中では深く相手を信頼し、尊敬しています。相手に依存しない自立した関係を築きたい人には最適のパートナーです。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+
+        const introScreen = document.getElementById('intro-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const resultTitle = document.getElementById('result-title');
+        const resultText = document.getElementById('result-text');
+        const shareXButton = document.getElementById('share-x-button');
+
+        function startQuiz() {
+            introScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+            questionText.textContent = question.question;
+            optionsContainer.innerHTML = ''; // 以前の選択肢をクリア
+
+            question.options.forEach((option, index) => {
+                const label = document.createElement('label');
+                label.className = 'option-label';
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'answer';
+                input.value = option.score;
+                input.id = `option-${index}`;
+                const customRadio = document.createElement('span');
+                customRadio.className = 'custom-radio';
+                const optionText = document.createTextNode(option.text);
+
+                label.appendChild(input);
+                label.appendChild(customRadio);
+                label.appendChild(optionText);
+                optionsContainer.appendChild(label);
+            });
+            nextButton.disabled = true; // 次の質問へボタンを初期状態では無効に
+            optionsContainer.addEventListener('change', enableNextButton);
+        }
+
+        function enableNextButton() {
+            nextButton.disabled = false;
+            optionsContainer.removeEventListener('change', enableNextButton); // 1度有効にしたら解除
+        }
+
+        function nextQuestion() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (!selectedOption) {
+                alert('選択肢を選んでください！');
+                return;
+            }
+
+            totalScore += parseInt(selectedOption.value);
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            const result = results.find(r => totalScore >= r.minScore && totalScore <= r.maxScore);
+            resultTitle.textContent = result.title;
+            resultText.textContent = result.description;
+
+            // Xシェアボタンの設定
+            const shareText = `私の恋愛タイプは【${result.title}】でした！\nあなたも「あなたの恋愛タイプ診断」で診断してみよう！\n#恋愛タイプ診断 #心理テスト`;
+            const shareUrl = encodeURIComponent(window.location.href);
+            const xShareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${shareUrl}`;
+            shareXButton.href = xShareLink;
+        }
+
+        function retryQuiz() {
+            resultScreen.classList.add('hidden');
+            introScreen.classList.remove('hidden'); // 導入画面に戻る
+            currentQuestionIndex = 0;
+            totalScore = 0;
+        }
+
+        // ページロード時に診断開始ボタンを有効にする
+        document.addEventListener('DOMContentLoaded', () => {
+            const startButton = document.querySelector('#intro-screen .button');
+            if (startButton) {
+                startButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
