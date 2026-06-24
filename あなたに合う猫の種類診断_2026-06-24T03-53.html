@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたに合う猫の種類診断</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0f8ff, #e0ffff); /* 淡い水色系のグラデーション */
+            color: #333;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #quiz-container, #result-container {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.8s forwards;
+            box-sizing: border-box;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #4CAF50; /* 猫をイメージした優しい緑 */
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        #question-text {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #555;
+        }
+
+        .choices-container button {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border: 2px solid #a8dadc;
+            border-radius: 10px;
+            background-color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #457b9d;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .choices-container button:hover {
+            background-color: #a8dadc;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .choices-container button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #result-container h2 {
+            font-size: 2em;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        #result-container p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .action-buttons button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 0 10px;
+        }
+
+        #restart-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+
+        #restart-button:hover {
+            background-color: #45a049;
+        }
+
+        #share-x-button {
+            background-color: #1DA1F2; /* X (Twitter) Blue */
+            color: white;
+            border: none;
+        }
+
+        #share-x-button:hover {
+            background-color: #0d8ddb;
+        }
+
+        @media (max-width: 600px) {
+            #quiz-container, #result-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            #question-text {
+                font-size: 1.1em;
+            }
+            .choices-container button {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+            #result-container h2 {
+                font-size: 1.8em;
+            }
+            #result-container p {
+                font-size: 1em;
+            }
+            .action-buttons button {
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h1>あなたに合う猫の種類診断</h1>
+        <div id="question-container">
+            <p id="question-text"></p>
+            <div id="choices-container" class="choices-container">
+                <!-- 選択肢がここにJavaScriptで挿入されます -->
+            </div>
+        </div>
+    </div>
+
+    <div id="result-container" class="hidden">
+        <h2>あなたにぴったりの猫は...</h2>
+        <h2 id="result-title"></h2>
+        <p id="result-description"></p>
+        <div class="action-buttons">
+            <button id="restart-button">もう一度診断する</button>
+            <button id="share-x-button">結果をXでシェア</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "週末の過ごし方として一番しっくりくるのは？",
+                choices: [
+                    { text: "新しいカフェやスポット巡り！", score: { abyssinian: 1 } },
+                    { text: "家でまったり、好きなドラマを一気見", score: { ragdoll: 1, scottish_fold: 0.5 } },
+                    { text: "友人を誘ってワイワイパーティー", score: { ame_shorthair: 1 } },
+                    { text: "静かな場所で読書や趣味に没頭", score: { scottish_fold: 1, ragdoll: 0.5 } }
+                ]
+            },
+            {
+                question: "ストレスを感じた時、どうしますか？",
+                choices: [
+                    { text: "気分転換に体を動かす", score: { abyssinian: 1, ame_shorthair: 0.5 } },
+                    { text: "信頼できる人に話を聞いてもらう", score: { ragdoll: 1 } },
+                    { text: "とりあえず美味しいものを食べる", score: { ame_shorthair: 1 } },
+                    { text: "一人になってゆっくり考える", score: { scottish_fold: 1 } }
+                ]
+            },
+            {
+                question: "もしペットを飼うなら、どんな関係を築きたいですか？",
+                choices: [
+                    { text: "一緒に色々なことを経験したい相棒", score: { abyssinian: 1 } },
+                    { text: "常に寄り添ってくれる家族のような存在", score: { ragdoll: 1, scottish_fold: 0.5 } },
+                    { text: "遊んだり笑ったり、賑やかなムードメーカー", score: { ame_shorthair: 1 } },
+                    { text: "お互いのペースを尊重し合える関係", score: { scottish_fold: 1, ragdoll: 0.5 } }
+                ]
+            },
+            {
+                question: "あなたが「これだけは譲れない」と思うことは？",
+                choices: [
+                    { text: "新しいことへの挑戦、知的好奇心", score: { abyssinian: 1 } },
+                    { text: "人との繋がり、温かい人間関係", score: { ragdoll: 1 } },
+                    { text: "楽しいこと、ポジティブな気持ち", score: { ame_shorthair: 1 } },
+                    { text: "心の安らぎ、落ち着いた時間", score: { scottish_fold: 1 } }
+                ]
+            },
+            {
+                question: "どんな住まいが理想的ですか？",
+                choices: [
+                    { text: "広々としていて、開放感のある空間", score: { abyssinian: 1 } },
+                    { text: "家族や友人が集まりやすい、アットホームな家", score: { ragdoll: 1 } },
+                    { text: "いつも明るく、遊び心のあるインテリアの部屋", score: { ame_shorthair: 1 } },
+                    { text: "静かで落ち着ける、プライベートな空間", score: { scottish_fold: 1 } }
+                ]
+            }
+        ];
+
+        const results = {
+            abyssinian: {
+                name: "アビシニアン",
+                description: "活発で好奇心旺盛なあなたには、遊び好きで賢いアビシニアンがぴったり！一���に新しい発見を楽しみ、刺激的な毎日を送りましょう。",
+            },
+            ragdoll: {
+                name: "ラグドール",
+                description: "温厚で人懐っこいあなたには、優しくて抱っこが大好きなラグドールがぴったり！癒やしの時間を共に過ごし、深い絆を育めます。",
+            },
+            ame_shorthair: {
+                name: "アメリカンショートヘア",
+                description: "明るく社交的なあなたには、陽気でどんな環境にも順応するアメリカンショートヘアがぴったり！毎日を楽しく彩り、笑顔を届けてくれるでしょう。",
+            },
+            scottish_fold: {
+                name: "スコティッシュフォールド",
+                description: "穏やかで落ち着いたあなたには、甘えん坊で静かなスコティッシュフォールドがぴったり！ゆったりとした時間を共有し、互いに癒やし合える関係です。",
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = {
+            abyssinian: 0,
+            ragdoll: 0,
+            ame_shorthair: 0,
+            scottish_fold: 0
+        };
+
+        const quizContainer = document.getElementById('quiz-container');
+        const questionText = document.getElementById('question-text');
+        const choicesContainer = document.getElementById('choices-container');
+        const resultContainer = document.getElementById('result-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const restartButton = document.getElementById('restart-button');
+        const shareXButton = document.getElementById('share-x-button');
+
+        function displayQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const question = questions[currentQuestionIndex];
+                questionText.textContent = question.question;
+                choicesContainer.innerHTML = ''; // 選択肢をクリア
+
+                question.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.onclick = () => selectAnswer(choice.score);
+                    choicesContainer.appendChild(button);
+                });
+            } else {
+                displayResult();
+            }
+        }
+
+        function selectAnswer(choiceScore) {
+            for (const key in choiceScore) {
+                if (scores.hasOwnProperty(key)) {
+                    scores[key] += choiceScore[key];
+                }
+            }
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+
+        function displayResult() {
+            quizContainer.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+
+            let maxScore = -1;
+            let resultType = '';
+
+            for (const type in scores) {
+                if (scores[type] > maxScore) {
+                    maxScore = scores[type];
+                    resultType = type;
+                }
+            }
+            
+            // 同点の場合の優先順位（任意で設定、例：abyssinian > ragdoll > ame_shorthair > scottish_fold）
+            // この診断では、先に見つかった方が優先される単純なロジックで十分
+            
+            const result = results[resultType];
+            resultTitle.textContent = result.name;
+            resultDescription.textContent = result.description;
+
+            // Xシェアボタンの設定
+            const shareText = `あなたの性格に合う猫は「${result.name}」でした！\n${result.description.split('。')[0]}。\n#あなたに合う猫の種類診断`;
+            const shareUrl = window.location.href; // 現在のページのURL
+            shareXButton.onclick = () => {
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+            };
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            scores = {
+                abyssinian: 0,
+                ragdoll: 0,
+                ame_shorthair: 0,
+                scottish_fold: 0
+            };
+            resultContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            displayQuestion();
+        }
+
+        // イベントリスナー
+        restartButton.addEventListener('click', restartQuiz);
+
+        // 診断開始
+        displayQuestion();
+    </script>
+</body>
+</html>

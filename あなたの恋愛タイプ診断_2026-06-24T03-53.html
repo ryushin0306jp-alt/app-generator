@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの恋愛タイプ診断</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #app {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #e91e63;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            line-height: 1.6;
+        }
+
+        #options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-button {
+            background-color: #fff;
+            border: 2px solid #ff758c;
+            color: #ff758c;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .option-button:hover {
+            background-color: #ff758c;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(255, 117, 140, 0.3);
+        }
+
+        .option-button:active {
+            transform: translateY(1px);
+        }
+
+        #result-container {
+            margin-top: 30px;
+        }
+
+        #result-container h2 {
+            color: #e91e63;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        #result-container p {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .share-button {
+            background-color: #1DA1F2;
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .share-button:hover {
+            background-color: #0d8ddb;
+        }
+
+        .share-button svg {
+            fill: #fff;
+            width: 18px;
+            height: 18px;
+        }
+
+        #restart-button {
+            background-color: #f0f0f0;
+            color: #333;
+            border-color: #ccc;
+            margin-top: 15px;
+            margin-right: 10px;
+        }
+
+        #restart-button:hover {
+            background-color: #e0e0e0;
+            color: #333;
+            box-shadow: none;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            .option-button, .share-button, #restart-button {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+            #app {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>あなたの恋愛タイプ診断</h1>
+
+        <div id="quiz-container" class="card">
+            <h2 id="question-text"></h2>
+            <div id="options-container">
+                <!-- 質問の選択肢がここにJavaScriptで挿入されます -->
+            </div>
+        </div>
+
+        <div id="result-container" class="card" style="display: none;">
+            <h2 id="result-title"></h2>
+            <p id="result-description"></p>
+            <button id="restart-button" class="option-button">もう一度診断する</button>
+            <button id="share-button" class="share-button">
+                <svg viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M714.163 519.284L1160.29 0H1055.03L667.137 450.887L357.328 0H0L452.077 629.201L0 1227H105.266L500.306 755.737L855.617 1227H1200L714.163 519.284ZM569.165 687.828L521.697 622.937L144.011 79.694H306.615L611.412 515.602L658.88 580.493L1055.08 1150.35H892.476L569.165 687.828Z" fill="currentColor"/>
+                </svg>
+                Xでシェアする
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                q: "休日の過ごし方で一番理想的なのは？",
+                options: [
+                    { text: "友達や恋人と賑やかに過ごす", score: 1 }, // 情熱的、社交的
+                    { text: "家でゆっくり趣味に没頭する", score: 2 }, // 落ち着き、内向的
+                    { text: "新しい場所へ出かけて刺激を得る", score: 3 }, // 探求���、自由
+                    { text: "仕事やスキルアップのために時間を使う", score: 4 }  // 実用的、努力家
+                ]
+            },
+            {
+                q: "恋愛において、相手に最も求めるものは？",
+                options: [
+                    { text: "常に一緒にいてくれる安心感", score: 1 }, // 依存、安定
+                    { text: "お互いの成長を助け合える関係", score: 4 }, // 向上心、自立
+                    { text: "新鮮な驚きとワクワクする刺激", score: 3 }, // 刺激、変化
+                    { text: "深い理解と心の繋がり", score: 2 }  // 共感、内面重視
+                ]
+            },
+            {
+                q: "パートナーとの喧嘩、あなたの主な対応は？",
+                options: [
+                    { text: "すぐに話し合い、解決しようとする", score: 1 }, // 直情的、解決志向
+                    { text: "一人になって冷静に考える時間が必要", score: 2 }, // 内省的、冷却期間
+                    { text: "相手の意見を聞き、妥協点を探る", score: 4 }, // 調和、協調性
+                    { text: "しばらくは距離を置く", score: 3 }  // 自由、距離感
+                ]
+            },
+            {
+                q: "理想のデートプランは？",
+                options: [
+                    { text: "二人きりでロマンチックなディナー", score: 1 }, // 親密、独占
+                    { text: "美術館や博物館を巡り、知的好奇心を満たす", score: 2 }, // 知的、内省的
+                    { text: "テーマパークやイベントで思い切り楽しむ", score: 3 }, // 刺激、アクティブ
+                    { text: "家でまったり手料理を作る", score: 4 }  // 落ち着き、家庭的
+                ]
+            },
+            {
+                q: "あなたが恋愛で最も不安を感じるのはどんな時？",
+                options: [
+                    { text: "相手の気持ちが分からなくなった時", score: 2 }, // 不安、共感不足
+                    { text: "束縛されたり、自由が奪われると感じた時", score: 3 }, // 自由、束縛嫌い
+                    { text: "将来に対するビジョンが合わないと感じた時", score: 4 }, // 将来性、現実的
+                    { text: "一人にされる時間が長い時", score: 1 }  // 寂しさ、依存
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                min: 5, max: 8,
+                title: "情熱的なロマンチストタイプ",
+                description: "あなたは感情豊かで、恋愛に深い情熱を注ぐタイプです。相手との絆を何よりも大切にし、常に愛情表現を求めます。ドラマチックな展開を好み、サプライズや感動を共有することで、より一層関係を深めようとします。時には感情的になりやすい面もありますが、それもあなたの魅力。相手を強く愛するがゆえの行動です。"
+            },
+            {
+                min: 9, max: 12,
+                title: "穏やかな探求者タイプ",
+                description: "あなたは内省的で、相手の内面を深く理解しようと努めるタイプです。落ち着いた関係を好み、一人の時間も大切にします。相手との共通の趣味や知的な会話を通して、心の繋がりを深めることを重視します。急激な変化は苦手ですが、一度築いた関係は長く安定的に続きます。信頼と尊重が、あなたの恋愛におけるキーワードです。"
+            },
+            {
+                min: 13, max: 16,
+                title: "自由を愛する冒険家タイプ",
+                description: "あなたは新しいことや刺激を求める、自由奔放��タイプです。恋愛においても、常に新鮮な驚きや発見を求めます。束縛されることを嫌い、お互いの個性を尊重し合える関係が理想です。パートナーとは、一緒に新しい世界を探求する仲間のような関係を築きたいと願っています。マンネリは避けたいので、いつもドキドキできるようなデートを提案すると良いでしょう。"
+            },
+            {
+                min: 17, max: 20,
+                title: "現実的な成長志向タイプ",
+                description: "あなたは現実的で、恋愛を通して自己成長を目指すタイプです。パートナーには、お互いを高め合える関係を求めます。感情に流されることなく、将来のビジョンを共有し、共に目標に向かって努力できる関係を理想とします。安定志向でありながらも、常に向上心を持っているため、自立した大人の恋愛を築くことができるでしょう。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+
+        const quizContainer = document.getElementById('quiz-container');
+        const resultContainer = document.getElementById('result-container');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const shareButton = document.getElementById('share-button');
+        const restartButton = document.getElementById('restart-button');
+
+        function loadQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const currentQuestion = questions[currentQuestionIndex];
+                questionText.textContent = currentQuestion.q;
+                optionsContainer.innerHTML = ''; // Clear previous options
+
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option.text;
+                    button.classList.add('option-button');
+                    button.addEventListener('click', () => selectOption(option.score));
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                displayResult();
+            }
+        }
+
+        function selectOption(score) {
+            totalScore += score;
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function displayResult() {
+            quizContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+
+            const userResult = results.find(r => totalScore >= r.min && totalScore <= r.max);
+            
+            resultTitle.textContent = userResult.title;
+            resultDescription.textContent = userResult.description;
+
+            // XシェアボタンのURLを生成
+            const shareText = `診断結果：「${userResult.title}」\nあなたの恋愛タイプはこれだ！ #恋愛タイプ診断 #診断アプリ\n`;
+            // 実際のデプロイURLに置き換えてください
+            const shareUrl = window.location.href.split('?')[0]; // 現在のURLからパラメータを除去
+            const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+            shareButton.onclick = () => window.open(twitterIntentUrl, "_blank");
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            quizContainer.style.display = 'block';
+            resultContainer.style.display = 'none';
+            loadQuestion();
+        }
+
+        // イベントリスナー
+        restartButton.addEventListener('click', restartQuiz);
+
+        // アプリ起動
+        document.addEventListener('DOMContentLoaded', loadQuestion);
+    </script>
+</body>
+</html>
