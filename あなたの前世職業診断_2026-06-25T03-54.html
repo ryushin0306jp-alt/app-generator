@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの前世職業診断</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96); /* グラデーション背景 */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #app {
+            background-color: #ffffff; /* 白いカード */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        h1, h2 {
+            color: #3f2b96;
+            margin-bottom: 25px;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            padding: 15px 25px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #6a11cb;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .button:hover {
+            background-color: #4a0f8c;
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        #quiz-screen .question {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: #3f2b96;
+        }
+
+        #progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            height: 10px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #6a11cb;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        #result-screen .result-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #6a11cb;
+        }
+
+        #result-screen .result-description {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        .share-button {
+            background-color: #000; /* Xのブランドカラー */
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: white;
+            font-size: 18px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .share-button:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+
+        .share-button img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            filter: invert(1); /* 白いXアイコン */
+        }
+
+        /* 画面の表示/非表示 */
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            #app {
+                padding: 30px 20px;
+            }
+            .button {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+            #quiz-screen .question {
+                font-size: 18px;
+            }
+            #result-screen .result-title {
+                font-size: 24px;
+            }
+            #result-screen .result-description {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 開始画面 -->
+        <div id="start-screen" class="screen active">
+            <h1>あなたの前世職業診断</h1>
+            <p>もしあなたが過去の時代に生きていたら、どのような職業に就いていたでしょうか？いくつかの質問に答えて、あなたの前世の姿を紐解いてみましょう。</p>
+            <button class="button" onclick="startQuiz()">診断を開始する</button>
+        </div>
+
+        <!-- クイズ画面 -->
+        <div id="quiz-screen" class="screen">
+            <h2 id="question-text"></h2>
+            <div id="options-container">
+                <!-- 選択肢がここに動的に挿入される -->
+            </div>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="screen">
+            <h2 class="result-title" id="result-title"></h2>
+            <p class="result-description" id="result-description"></p>
+            <a id="share-on-x" class="share-button" target="_blank" rel="noopener noreferrer">
+                <img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTE4LjI0NCAybC0xLjYyNiAxLjc1N0wxNi42NzYgMTRoLTIuMjEzTDE4LjIzOSAzLjYxNyAxMi4xMzYgMTlsLTkuODkwMi0xMi42NzYtLjAwNTUuMDA1NUwyLjAzMTUgMmguNDk2NjlMMTAuMTE4MiAxMy40OTZMOC41ODYgMi4wMDVoMi42Njk4bDEuMzk4OSAxMi4zMzEgNC4wMDM5LTEwLjAwMy43MDk0LS43Njl6IiBmaWxsPSIjRkZGRkZGIi8+PC9zdmc+" alt="Xロゴ">
+                結果をXでシェア
+            </a>
+            <button class="button" onclick="resetQuiz()">もう一度診断する</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "もしタイムトラベルができるなら、どの時代に行ってみたい？",
+                options: [
+                    { text: "古代エジプトの壮大な文明", points: 1 },
+                    { text: "中世ヨーロッパの華やかな宮廷", points: 2 },
+                    { text: "戦国時代の日本の激動の時代", points: 3 },
+                    { text: "近未来の地球、技術革新の最前線", points: 4 }
+                ]
+            },
+            {
+                question: "あなたが一番惹かれるものは？",
+                options: [
+                    { text: "古い書物や巻物、知識の源", points: 1 },
+                    { text: "美しい宝飾品や美術品、芸術の結晶", points: 2 },
+                    { text: "武器や防具、戦略を練る道具", points: 3 },
+                    { text: "最新の発明品や技術、未来を形作るもの", points: 4 }
+                ]
+            },
+            {
+                question: "集団の中で、あなたはどのような役割を果たすことが多い？",
+                options: [
+                    { text: "知識を伝え、分析する賢者", points: 1 },
+                    { text: "人々を魅了し、感情を動かす芸術家", points: 2 },
+                    { text: "指導者として皆を率い、困難を乗り越える", points: 3 },
+                    { text: "新しいものを生み出し、未来を創造する研究者", points: 4 }
+                ]
+            },
+            {
+                question: "もし一日中自由に使える時間があるなら、何をしたい？",
+                options: [
+                    { text: "図書館や博物館で歴史や科学を学ぶ", points: 1 },
+                    { text: "美しい庭園を散策したり、絵を描いたりする", points: 2 },
+                    { text: "武術の稽古や戦略ゲームで腕を磨く", points: 3 },
+                    { text: "新しいプログラミング言語を学ぶか、ガジェットをいじる", points: 4 }
+                ]
+            },
+            {
+                question: "あなたの最も得意なことは？",
+                options: [
+                    { text: "物事を深く分析し、真理を追求すること", points: 1 },
+                    { text: "人々の感情を理解し、共感を示すこと", points: 2 },
+                    { text: "困難な状況でも冷静に判断し、行動すること", points: 3 },
+                    { text: "既存の枠にとらわれず、新しいアイデアを出すこと", points: 4 }
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                title: "哲学を究めた賢者・学者",
+                description: "あなたの前世は、深い知識と洞察力で人々を導いた賢者や学者だったようです。書物や思想の世界に没頭し、真理の探求に生涯を捧げました。その知識は、現代のあなたにも受け継がれているかもしれません。"
+            },
+            {
+                title: "宮廷の芸術家・職人",
+                description: "あなたの前世は、美を愛し、それを形にする才能に恵まれた芸術家や職人だったようです。絵画、音楽、彫刻、あるいは宝飾品など、その手から生み出される作品は多くの人々を魅了しました。細部にこだわる繊細な感性が、今のあなたを彩っています。"
+            },
+            {
+                title: "時代の指導者・勇敢な戦士",
+                description: "あなたの前世は、困難な時代を切り開き、人々を導いた指導者や勇敢な戦士だったようです。強い意志と優れた戦略眼で、多くの人々を救い、歴史に名を残しました。そのリーダーシップは、現代のあなたの行動力にも表れているでしょう。"
+            },
+            {
+                title: "革命的な発明家・探検家",
+                description: "あなたの前世は、既存の概念を打ち破り、新しい世界を切り開いた発明家や探検家だったようです。未知への探求心と、ひらめきを形にする創造力で、後の世に大きな影響を与えました。常に新しいことに挑戦する好奇心旺盛な精神が、今のあなたを突き動かします。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressBar = document.getElementById('progress-bar');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const shareOnXButton = document.getElementById('share-on-x');
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startQuiz() {
+            score = 0;
+            currentQuestionIndex = 0;
+            showScreen('quiz-screen');
+            displayQuestion();
+            updateProgressBar();
+        }
+
+        function displayQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = `Q${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+            optionsContainer.innerHTML = '';
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('button');
+                button.textContent = option.text;
+                button.onclick = () => selectAnswer(option.points);
+                optionsContainer.appendChild(button);
+            });
+            updateProgressBar();
+        }
+
+        function selectAnswer(points) {
+            score += points;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = (currentQuestionIndex / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showResult() {
+            let resultIndex;
+            // スコア範囲に基づいて結果を決定 (5問 * 1-4点 = 5-20点)
+            if (score >= 5 && score <= 8) {
+                resultIndex = 0; // 賢者・学者
+            } else if (score >= 9 && score <= 12) {
+                resultIndex = 1; // 芸術家・職人
+            } else if (score >= 13 && score <= 16) {
+                resultIndex = 2; // 指導者・戦士
+            } else { // score >= 17 && score <= 20
+                resultIndex = 3; // 発明家・探検家
+            }
+
+            const finalResult = results[resultIndex];
+            resultTitle.textContent = finalResult.title;
+            resultDescription.textContent = finalResult.description;
+            
+            // Xシェアボタンの設定
+            const shareText = `診断結果は「${finalResult.title}」でした！\nあなたも前世の職業を診断してみませんか？ #前世職業診断`;
+            const shareUrl = encodeURIComponent(window.location.href);
+            const xShareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${shareUrl}`;
+            shareOnXButton.href = xShareLink;
+
+            showScreen('result-screen');
+        }
+
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            showScreen('start-screen');
+            progressBar.style.width = '0%';
+        }
+    </script>
+</body>
+</html>

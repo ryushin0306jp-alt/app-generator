@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの恋愛タイプ診断</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to right top, #a18cd1, #fbc2eb); /* パープルピンクのグラデーション */
+            color: #333;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #8c7ae6;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #8c7ae6;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        #choices-container {
+            margin-top: 25px;
+        }
+
+        .choice-item {
+            background-color: #f8f8f8;
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: block; /* label要素全体をクリック可能にするため */
+        }
+
+        .choice-item:hover {
+            background-color: #f0f0f0;
+            border-color: #d1c4e9;
+        }
+
+        .choice-item input[type="radio"] {
+            display: none; /* ラジオボタン自体は隠す */
+        }
+
+        /* カスタムラジオボタンのデザイン */
+        .choice-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            padding-left: 30px; /* カスタムチェックボックスのスペース */
+        }
+
+        .choice-item label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+
+        .choice-item input[type="radio"]:checked + label::before {
+            border-color: #8c7ae6;
+            background-color: #8c7ae6;
+        }
+
+        .choice-item input[type="radio"]:checked + label::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: #fff;
+            border-radius: 50%;
+        }
+
+        .choice-item input[type="radio"]:checked + label {
+            background-color: #e5e0f0; /* チェックされたら少し濃い色に */
+            border-color: #8c7ae6;
+        }
+
+        button {
+            background-color: #8c7ae6;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #6a5acb;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .share-buttons {
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .share-button {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .x-button {
+            background-color: #000;
+        }
+
+        .x-button:hover {
+            background-color: #333;
+        }
+
+        /* 画面が小さい場合の調整 */
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            button, .share-button {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+            .choice-item label {
+                padding-left: 25px; /* カスタムチェックボックスのスペース */
+            }
+            .choice-item label::before {
+                width: 18px;
+                height: 18px;
+            }
+            .choice-item input[type="radio"]:checked + label::after {
+                left: 5px;
+                width: 7px;
+                height: 7px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>あなたの恋愛タイプ診断</h1>
+            <p id="description">簡単な質問に答えて、あなたの隠れた恋愛タイプを診断しましょう！</p>
+
+            <div id="quiz-start-section">
+                <button id="start-button">診断を始める</button>
+            </div>
+
+            <div id="question-section" style="display: none;">
+                <h2 id="question-text"></h2>
+                <div id="choices-container">
+                    <!-- 選択肢がここにJSで挿入される -->
+                </div>
+                <button id="next-button">次の質問へ</button>
+            </div>
+
+            <div id="result-section" style="display: none;">
+                <h2 id="result-title"></h2>
+                <p id="result-description"></p>
+                <div class="share-buttons">
+                    <a id="share-x" href="#" target="_blank" class="share-button x-button">Xでシェア</a>
+                </div>
+                <button id="restart-button">もう一度診断する</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "初対面の人と話すとき、あなたはどんな気持ちになりますか？",
+                choices: [
+                    { text: "ドキドキするけど、新しい出会いにワクワクする", scores: [1, 0, 0, 0] },
+                    { text: "少し緊張するけど、相手に合わせて話せる", scores: [0, 1, 0, 0] },
+                    { text: "話しかけられるのを待つことが多い", scores: [0, 0, 1, 0] },
+                    { text: "自分のペースで話したい、興味がないと話さない", scores: [0, 0, 0, 1] }
+                ]
+            },
+            {
+                question: "好きな人とのデートプランを立てるとしたら、どんなデートにしますか？",
+                choices: [
+                    { text: "話題のスポット巡りやイベントに参加する", scores: [1, 0, 0, 0] },
+                    { text: "落ち着いたカフェでゆっくり話したり、散歩したりする", scores: [0, 1, 0, 0] },
+                    { text: "相手の行きたい場所に合わせる", scores: [0, 0, 1, 0] },
+                    { text: "自分の趣味を共有できる場所に行く", scores: [0, 0, 0, 1] }
+                ]
+            },
+            {
+                question: "パートナーと意見が対立したとき、あなたはどうしますか？",
+                choices: [
+                    { text: "積極的に話し合い、解決策を見つけようとする", scores: [1, 0, 0, 0] },
+                    { text: "相手の意見も尊重しつつ、自分の意見も伝える", scores: [0, 1, 0, 0] },
+                    { text: "衝突を避けたいので、相手に合わせることが多い", scores: [0, 0, 1, 0] },
+                    { text: "自分の意見を曲げない、相手が理解してくれるのを待つ", scores: [0, 0, 0, 1] }
+                ]
+            },
+            {
+                question: "パートナーにサプライズを仕掛けるとしたら、どんなサプライズを選びますか？",
+                choices: [
+                    { text: "派手でロマンチックな演出を考える", scores: [1, 0, 0, 0] },
+                    { text: "相手が本当に喜ぶ実用的なプレゼントや手料理", scores: [0, 1, 0, 0] },
+                    { text: "相手の友達や家族も巻き込んだイベント", scores: [0, 0, 1, 0] },
+                    { text: "サプライズは苦手、正直に気持ちを伝える方が良い", scores: [0, 0, 0, 1] }
+                ]
+            },
+            {
+                question: "恋愛において、最も大切にしたいことは何ですか？",
+                choices: [
+                    { text: "二人の間で常に刺激と成長があること", scores: [1, 0, 0, 0] },
+                    { text: "互いを理解し合い、安心できる関係であること", scores: [0, 1, 0, 0] },
+                    { text: "相手を支え、喜ばせること", scores: [0, 0, 1, 0] },
+                    { text: "自分の時間や趣味も尊��されること", scores: [0, 0, 0, 1] }
+                ]
+            }
+        ];
+
+        const results = [
+            {
+                title: "情熱のリーダータイプ",
+                description: "あなたは恋愛において、常に刺激と新しい発見を求める情熱的なリーダータイプです。自ら率先して行動し、パートナーをリードしていくことに喜びを感じます。マンネリを嫌い、二人で一緒に成長していく関係を理想とします。時には強引に見られることもありますが、その真っ直ぐな愛情はパートナーを惹きつけます。"
+            },
+            {
+                title: "穏やかな癒し系タイプ",
+                description: "あなたは穏やかで、パートナーに安心感を与える癒し系タイプです。争いを好まず、相手の気持ちに寄り添うことを大切にします。聞き上手で、相手の意見を尊重し、心地よい関係を築くのが得意です。派手さはありませんが、その温かい愛情はパートナーにとってかけがえのない存在となるでしょう。"
+            },
+            {
+                title: "献身的なサポータータイプ",
+                description: "あなたはパートナーを心から支え、尽���すことに喜びを感じる献身的なサポータータイプです。相手の幸せが自分の幸せと感じ、惜しみない愛情を注ぎます。自己主張は控えめですが、パートナーのためならどんな努力も惜しみません。その深い愛情と支えは、パートナーにとって大きな力となります。"
+            },
+            {
+                title: "自由を愛するマイペースタイプ",
+                description: "あなたは恋愛においても自分の時間や価値観を大切にする、自由を愛するマイペースタイプです。束縛を嫌い、互いの自立を尊重する関係を求めます。一見クールに見えるかもしれませんが、心を開いた相手には深い愛情を示します。自分らしさを理解し、受け入れてくれるパートナーと最高の関係を築けるでしょう。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let scores = [0, 0, 0, 0]; // [情熱, 癒し, 献身, 自由]
+
+        // DOM要素の取得
+        const quizStartSection = document.getElementById('quiz-start-section');
+        const startButton = document.getElementById('start-button');
+        const questionSection = document.getElementById('question-section');
+        const questionText = document.getElementById('question-text');
+        const choicesContainer = document.getElementById('choices-container');
+        const nextButton = document.getElementById('next-button');
+        const resultSection = document.getElementById('result-section');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const shareXButton = document.getElementById('share-x');
+        const restartButton = document.getElementById('restart-button');
+        const appDescription = document.getElementById('description');
+
+        // 診断開始ボタンのクリックイベント
+        startButton.addEventListener('click', () => {
+            quizStartSection.style.display = 'none';
+            appDescription.style.display = 'none'; // 説明文も非表示
+            questionSection.style.display = 'block';
+            displayQuestion();
+        });
+
+        // 質問表示関数
+        function displayQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = `Q${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+            choicesContainer.innerHTML = ''; // 選択肢をクリア
+
+            currentQuestion.choices.forEach((choice, index) => {
+                const choiceItem = document.createElement('div');
+                choiceItem.className = 'choice-item';
+                choiceItem.innerHTML = `
+                    <input type="radio" id="choice${currentQuestionIndex}-${index}" name="question${currentQuestionIndex}" value="${index}">
+                    <label for="choice${currentQuestionIndex}-${index}">${choice.text}</label>
+                `;
+                choicesContainer.appendChild(choiceItem);
+            });
+            nextButton.disabled = true; // 次へボタンを無効化
+            addChoiceEventListeners(); // 選択肢にイベントリスナーを追加
+        }
+
+        // 選択肢にイベントリスナーを追加する関数
+        function addChoiceEventListeners() {
+            const radioButtons = document.querySelectorAll(`input[name="question${currentQuestionIndex}"]`);
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    nextButton.disabled = false; // 選択されたら有効化
+                });
+            });
+        }
+
+        // 次の質問へボタンのクリックイベント
+        nextButton.addEventListener('click', () => {
+            const selectedChoice = document.querySelector(`input[name="question${currentQuestionIndex}"]:checked`);
+            if (!selectedChoice) {
+                alert('選択してください！');
+                return;
+            }
+
+            const choiceIndex = parseInt(selectedChoice.value);
+            const choiceScores = questions[currentQuestionIndex].choices[choiceIndex].scores;
+            
+            // スコアを加算
+            for (let i = 0; i < scores.length; i++) {
+                scores[i] += choiceScores[i];
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                displayResult();
+            }
+        });
+
+        // 結果表示関数
+        function displayResult() {
+            questionSection.style.display = 'none';
+            resultSection.style.display = 'block';
+
+            // 最も高いスコアのタイプを特定 (同点の場合は最初のタイプを採用)
+            let maxScore = -1;
+            let resultIndex = 0;
+            for (let i = 0; i < scores.length; i++) {
+                if (scores[i] > maxScore) {
+                    maxScore = scores[i];
+                    resultIndex = i;
+                }
+            }
+
+            const finalResult = results[resultIndex];
+            resultTitle.textContent = finalResult.title;
+            resultDescription.textContent = finalResult.description;
+
+            // XシェアボタンのURLを生成
+            const shareText = `診断結果：あなたの恋愛タイプは「${finalResult.title}」でした！\n\n簡単な質問に答えて、あなたの恋愛タイプを診断しよう！\n`;
+            const shareUrl = encodeURIComponent(window.location.href); // 現在のページURL
+            shareXButton.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${shareUrl}`;
+        }
+
+        // もう一度診断するボタンのクリックイベント
+        restartButton.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            scores = [0, 0, 0, 0];
+            resultSection.style.display = 'none';
+            quizStartSection.style.display = 'block'; // スタート画面に戻る
+            appDescription.style.display = 'block'; // 説明文も再表示
+        });
+    </script>
+</body>
+</html>
